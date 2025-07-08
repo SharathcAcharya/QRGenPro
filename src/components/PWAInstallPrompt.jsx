@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Monitor, Tablet } from 'lucide-react';
+import { Download, X, Smartphone, Monitor, Tablet, Plus } from 'lucide-react';
 
 const PWAInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [deviceType, setDeviceType] = useState('desktop');
+  const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
     // Detect device type
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isTablet = /iPad|Android(?=.*Mobile)/i.test(navigator.userAgent);
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isTablet = /ipad|android(?=.*tablet)|kindle|silk/i.test(userAgent);
     
     if (isMobile && !isTablet) {
       setDeviceType('mobile');
@@ -21,19 +23,26 @@ const PWAInstallPrompt = () => {
     }
 
     const handleBeforeInstallPrompt = (e) => {
+      console.log('beforeinstallprompt fired');
       e.preventDefault();
       setDeferredPrompt(e);
+      setCanInstall(true);
       
-      // Show prompt after a short delay
-      setTimeout(() => {
-        setShowPrompt(true);
-      }, 2000);
+      // Show prompt after a delay if not dismissed recently
+      const dismissed = localStorage.getItem('pwa-prompt-dismissed');
+      if (!dismissed || Date.now() - parseInt(dismissed) > 24 * 60 * 60 * 1000) {
+        setTimeout(() => {
+          setShowPrompt(true);
+        }, 3000);
+      }
     };
 
     const handleAppInstalled = () => {
+      console.log('App installed');
       setIsInstalled(true);
       setShowPrompt(false);
       setDeferredPrompt(null);
+      setCanInstall(false);
       
       // Show success notification
       if (window.addNotification) {
@@ -46,35 +55,47 @@ const PWAInstallPrompt = () => {
     };
 
     // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://');
+    
+    if (isStandalone) {
       setIsInstalled(true);
     }
 
-    // Check if user has dismissed recently
-    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
-    if (dismissed) {
-      const dismissedTime = parseInt(dismissed);
-      const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-      if (dismissedTime > oneDayAgo) {
-        return;
-      }
-    }
-
+    // Listen for events
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    // For testing: Force show install capability after 5 seconds if no prompt
+    const testTimer = setTimeout(() => {
+      if (!deferredPrompt && !isStandalone) {
+        console.log('No install prompt detected, checking if we can show manual instructions');
+        setCanInstall(true);
+      }
+    }, 5000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      clearTimeout(testTimer);
     };
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // No install prompt available, show manual instructions
+      setShowPrompt(true);
+      return;
+    }
 
     try {
-      deferredPrompt.prompt();
+      console.log('Triggering install prompt');
+      const result = await deferredPrompt.prompt();
+      console.log('Install prompt result:', result);
+      
       const { outcome } = await deferredPrompt.userChoice;
+      console.log('User choice:', outcome);
       
       if (outcome === 'accepted') {
         setShowPrompt(false);
@@ -88,6 +109,8 @@ const PWAInstallPrompt = () => {
       }
     } catch (error) {
       console.error('Install failed:', error);
+      // Fallback to manual instructions
+      setShowPrompt(true);
     }
     
     setDeferredPrompt(null);
@@ -109,15 +132,24 @@ const PWAInstallPrompt = () => {
   const getInstallInstructions = () => {
     switch (deviceType) {
       case 'mobile':
-        return 'Tap "Add to Home Screen" in your browser menu';
+        if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+          return 'Tap Share button (📤) → "Add to Home Screen"';
+        }
+        return 'Tap menu (⋮) → "Add to Home screen"';
       case 'tablet':
         return 'Use "Add to Home Screen" from browser options';
       default:
-        return 'Click the install button in your browser address bar';
+        return 'Look for install icon (⊕) in address bar or use browser menu';
     }
   };
 
-  if (isInstalled || !showPrompt) {
+  // Don't show if installed
+  if (isInstalled) {
+    return null;
+  }
+
+  // Don't show prompt if not available and not manually triggered
+  if (!showPrompt && !canInstall) {
     return null;
   }
 
@@ -141,11 +173,9 @@ const PWAInstallPrompt = () => {
               Get the app on your {deviceType} for quick access and offline use.
             </p>
             
-            {!deferredPrompt && (
-              <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
-                💡 {getInstallInstructions()}
-              </p>
-            )}
+            <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+              💡 {getInstallInstructions()}
+            </p>
             
             <div className="flex space-x-2">
               {deferredPrompt ? (
@@ -157,9 +187,13 @@ const PWAInstallPrompt = () => {
                   <span>Install Now</span>
                 </button>
               ) : (
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  Browser install available
-                </div>
+                <button
+                  onClick={() => setShowPrompt(true)}
+                  className="flex items-center space-x-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Show Guide</span>
+                </button>
               )}
               
               <button

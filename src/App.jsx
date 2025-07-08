@@ -29,6 +29,8 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [totalQRCodes, setTotalQRCodes] = useState(0);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
@@ -43,10 +45,50 @@ function App() {
     // Count total QR codes generated
     const history = JSON.parse(localStorage.getItem('qr-history') || '[]');
     setTotalQRCodes(history.length);
+
+    // PWA install prompt handling
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setCanInstall(true);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setCanInstall(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
   }, []);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
+  };
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        }
+        setDeferredPrompt(null);
+        setCanInstall(false);
+      } catch (error) {
+        console.error('Install failed:', error);
+        setShowInstallGuide(true);
+      }
+    } else {
+      // Show install guide if no prompt available
+      setShowInstallGuide(true);
+    }
   };
 
   return (
@@ -86,17 +128,19 @@ function App() {
 
                   {/* Install Button - Desktop */}
                   <button
-                    onClick={() => setShowInstallGuide(true)}
+                    onClick={handleInstallClick}
                     className="hidden md:flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg"
                     title="Install App"
                   >
                     <Download className="w-4 h-4" />
-                    <span className="text-sm font-medium">Install App</span>
+                    <span className="text-sm font-medium">
+                      {deferredPrompt ? 'Install App' : 'Install Guide'}
+                    </span>
                   </button>
 
                   {/* Install Button - Mobile */}
                   <button
-                    onClick={() => setShowInstallGuide(true)}
+                    onClick={handleInstallClick}
                     className="md:hidden p-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 hover:scale-105 shadow-lg"
                     title="Install App"
                   >
@@ -131,11 +175,13 @@ function App() {
               {/* Mobile Install Prompt */}
               <div className="mt-6 md:hidden">
                 <button
-                  onClick={() => setShowInstallGuide(true)}
+                  onClick={handleInstallClick}
                   className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg animate-bounce"
                 >
                   <Download className="w-5 h-5" />
-                  <span className="font-medium">Install for Offline Use</span>
+                  <span className="font-medium">
+                    {deferredPrompt ? 'Install for Offline Use' : 'Get Install Instructions'}
+                  </span>
                 </button>
               </div>
             </div>
