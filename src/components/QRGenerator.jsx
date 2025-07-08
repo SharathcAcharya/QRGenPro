@@ -23,8 +23,8 @@ const QRGenerator = ({ onQRGenerated }) => {
     },
     imageOptions: {
       hideBackgroundDots: true,
-      imageSize: 0.4,
-      margin: 20,
+      imageSize: 0.6,
+      margin: 15,
       crossOrigin: 'anonymous'
     },
     dotsOptions: {
@@ -190,15 +190,17 @@ const QRGenerator = ({ onQRGenerated }) => {
                 />
               </div>
               {logoImage && (
-                <div className="flex items-center space-x-2">
-                  <img src={logoImage} alt="Logo preview" className="h-12 w-12 object-cover rounded" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Logo uploaded</span>
-                  <button
-                    onClick={() => setLogoImage(null)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Remove
-                  </button>
+                <div className="flex items-center space-x-3">
+                  <img src={logoImage} alt="Logo preview" className="h-20 w-20 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600" />
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Logo uploaded</span>
+                    <button
+                      onClick={() => setLogoImage(null)}
+                      className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

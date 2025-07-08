@@ -27,8 +27,8 @@ const QRPreview = ({ qrCode, qrRef }) => {
       
       {/* QR Code Display */}
       <div className="flex justify-center mb-6">
-        <div className="p-4 bg-white rounded-lg shadow-inner border-2 border-gray-100 dark:border-gray-600">
-          <div ref={qrRef} className="flex justify-center items-center min-h-[300px]" />
+        <div className="p-6 bg-white rounded-lg shadow-inner border-2 border-gray-100 dark:border-gray-600">
+          <div ref={qrRef} className="flex justify-center items-center min-h-[400px]" />
         </div>
       </div>
 
@@ -68,7 +68,7 @@ const QRPreview = ({ qrCode, qrRef }) => {
           </div>
           <div>
             <span className="text-gray-500 dark:text-gray-400">Size:</span>
-            <span className="ml-2 font-medium text-gray-900 dark:text-white">300x300px</span>
+            <span className="ml-2 font-medium text-gray-900 dark:text-white">400x400px</span>
           </div>
         </div>
       </div>
