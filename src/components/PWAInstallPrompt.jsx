@@ -118,6 +118,7 @@ const PWAInstallPrompt = () => {
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    setCanInstall(false);
     localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
   };
 
@@ -148,8 +149,8 @@ const PWAInstallPrompt = () => {
     return null;
   }
 
-  // Don't show prompt if not available and not manually triggered
-  if (!showPrompt && !canInstall) {
+  // Only show if we have explicit prompt or can install
+  if (!showPrompt) {
     return null;
   }
 

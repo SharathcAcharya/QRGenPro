@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: ['icon.svg'],
       manifest: {
         name: 'QRGenPro - Advanced QR Code Generator',
         short_name: 'QRGenPro',
@@ -24,34 +24,22 @@ export default defineConfig({
         dir: 'ltr',
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable'
-          },
-          {
             src: 'icon.svg',
             sizes: '48x48 72x72 96x96 128x128 192x192 256x256 384x384 512x512',
             type: 'image/svg+xml',
             purpose: 'any'
+          },
+          {
+            src: 'icon.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
+          },
+          {
+            src: 'icon.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
           }
         ],
         shortcuts: [
@@ -60,7 +48,7 @@ export default defineConfig({
             short_name: 'Create',
             description: 'Quickly create a new QR code',
             url: '/',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+            icons: [{ src: 'icon.svg', sizes: '192x192' }]
           }
         ]
       },
