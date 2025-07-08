@@ -5,9 +5,10 @@ import HelpModal from './components/HelpModal';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import SettingsModal from './components/SettingsModal';
 import OnboardingTutorial from './components/OnboardingTutorial';
+import InstallGuideModal from './components/InstallGuideModal';
 import { AnimatedBackground, TypewriterText, AnimatedCounter } from './components/AnimationComponents';
 import { NotificationProvider } from './components/NotificationSystem';
-import { QrCode, Settings, Sparkles } from 'lucide-react';
+import { QrCode, Settings, Sparkles, Download } from 'lucide-react';
 
 // Dark Mode Context
 const DarkModeContext = createContext();
@@ -26,7 +27,7 @@ function App() {
     return saved ? JSON.parse(saved) : false;
   });
   const [showSettings, setShowSettings] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [totalQRCodes, setTotalQRCodes] = useState(0);
 
   useEffect(() => {
@@ -42,12 +43,6 @@ function App() {
     // Count total QR codes generated
     const history = JSON.parse(localStorage.getItem('qr-history') || '[]');
     setTotalQRCodes(history.length);
-
-    // Check if onboarding should be shown
-    const onboardingCompleted = localStorage.getItem('onboarding-completed');
-    if (!onboardingCompleted) {
-      setShowOnboarding(true);
-    }
   }, []);
 
   const toggleDarkMode = () => {
@@ -88,6 +83,25 @@ function App() {
                       </span>
                     </div>
                   )}
+
+                  {/* Install Button - Desktop */}
+                  <button
+                    onClick={() => setShowInstallGuide(true)}
+                    className="hidden md:flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg"
+                    title="Install App"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span className="text-sm font-medium">Install App</span>
+                  </button>
+
+                  {/* Install Button - Mobile */}
+                  <button
+                    onClick={() => setShowInstallGuide(true)}
+                    className="md:hidden p-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 hover:scale-105 shadow-lg"
+                    title="Install App"
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
                   
                   <button
                     onClick={() => setShowSettings(true)}
@@ -113,6 +127,17 @@ function App() {
                 Generate stunning, customizable QR codes with logos, custom colors, and professional styling.
                 Perfect for business cards, marketing materials, and personal use.
               </p>
+
+              {/* Mobile Install Prompt */}
+              <div className="mt-6 md:hidden">
+                <button
+                  onClick={() => setShowInstallGuide(true)}
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg animate-bounce"
+                >
+                  <Download className="w-5 h-5" />
+                  <span className="font-medium">Install for Offline Use</span>
+                </button>
+              </div>
             </div>
             
             <div className="animate-scale-in" style={{ animationDelay: '0.2s' }}>
@@ -138,13 +163,14 @@ function App() {
           {/* Modals and Components */}
           <HelpModal />
           <PWAInstallPrompt />
+          <OnboardingTutorial />
+          <InstallGuideModal 
+            isOpen={showInstallGuide}
+            onClose={() => setShowInstallGuide(false)}
+          />
           <SettingsModal 
             isOpen={showSettings} 
             onClose={() => setShowSettings(false)} 
-          />
-          <OnboardingTutorial
-            isOpen={showOnboarding}
-            onClose={() => setShowOnboarding(false)}
           />
         </div>
       </DarkModeContext.Provider>
