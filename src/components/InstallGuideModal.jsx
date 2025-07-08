@@ -13,18 +13,18 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
           name: 'Chrome',
           icon: Chrome,
           steps: [
-            'Open QRGenPro in Chrome browser',
+            'Open QRloop in Chrome browser',
             'Look for the install icon (⊕) in the address bar',
             'Click the install icon',
             'Click "Install" in the popup dialog',
-            'QRGenPro will appear as a desktop app'
+            'QRloop will appear as a desktop app'
           ]
         },
         {
           name: 'Edge',
           icon: Monitor,
           steps: [
-            'Open QRGenPro in Microsoft Edge',
+            'Open QRloop in Microsoft Edge',
             'Click the three dots menu (⋯)',
             'Select "Apps" → "Install this site as an app"',
             'Choose a name and click "Install"',
@@ -41,22 +41,22 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
           name: 'Chrome (Android)',
           icon: Chrome,
           steps: [
-            'Open QRGenPro in Chrome mobile',
+            'Open QRloop in Chrome mobile',
             'Tap the three dots menu (⋮)',
             'Select "Add to Home screen"',
             'Choose a name and tap "Add"',
-            'Find QRGenPro on your home screen'
+            'Find QRloop on your home screen'
           ]
         },
         {
           name: 'Safari (iOS)',
           icon: Share,
           steps: [
-            'Open QRGenPro in Safari',
+            'Open QRloop in Safari',
             'Tap the Share button (📤)',
             'Scroll down and tap "Add to Home Screen"',
             'Edit the name if needed and tap "Add"',
-            'QRGenPro icon will appear on your home screen'
+            'QRloop icon will appear on your home screen'
           ]
         }
       ]
@@ -69,7 +69,7 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
           name: 'Chrome (Android Tablet)',
           icon: Chrome,
           steps: [
-            'Open QRGenPro in Chrome',
+            'Open QRloop in Chrome',
             'Tap the three dots menu',
             'Select "Add to Home screen"',
             'Confirm the installation',
@@ -80,7 +80,7 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
           name: 'Safari (iPad)',
           icon: Share,
           steps: [
-            'Open QRGenPro in Safari',
+            'Open QRloop in Safari',
             'Tap the Share button',
             'Select "Add to Home Screen"',
             'Customize the name and tap "Add"',
@@ -95,7 +95,7 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
     {
       icon: Download,
       title: 'Offline Access',
-      description: 'Use QRGenPro even without internet connection'
+      description: 'Use QRloop even without internet connection'
     },
     {
       icon: HomeIcon,
@@ -129,7 +129,7 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
               <Download className="w-4 h-4 text-white" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Install QRGenPro
+              Install QRloop
             </h2>
           </div>
           <button
@@ -231,7 +231,7 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
                   💡 Pro Tips
                 </h4>
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                  <li>• Once installed, QRGenPro works offline</li>
+                  <li>• Once installed, QRloop works offline</li>
                   <li>• You can uninstall anytime from your device settings</li>
                   <li>• The app automatically updates in the background</li>
                   <li>• All your QR history and settings are preserved</li>

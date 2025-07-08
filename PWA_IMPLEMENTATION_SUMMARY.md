@@ -1,8 +1,8 @@
-# QRGenPro PWA - Quick Installation Summary
+# QRloop PWA - Quick Installation Summary
 
 ## 🎯 What You Get
 
-Your QRGenPro application is now a **fully installable Progressive Web App (PWA)** that users can install on their devices and use offline!
+Your QRloop application is now a **fully installable Progressive Web App (PWA)** that users can install on their devices and use offline!
 
 ## ✅ PWA Features Implemented
 
@@ -138,6 +138,6 @@ Your PWA is production-ready and can be deployed to:
 
 ## 🎉 Success!
 
-Your QRGenPro app is now a professional PWA that users can install on any device and use offline. The app provides a native-like experience while being accessible from any modern web browser.
+Your QRloop app is now a professional PWA that users can install on any device and use offline. The app provides a native-like experience while being accessible from any modern web browser.
 
 **Key Achievement**: You've transformed a web app into an installable, offline-capable Progressive Web App with just a few configuration changes! 🎨✨

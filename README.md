@@ -1,8 +1,8 @@
-# QRGenPro - Advanced QR Code Generator 🚀
+# QRloop - Advanced QR Code Generator 🚀
 
 A modern, feature-rich QR code generator built with React, Vite, and Tailwind CSS. Create beautiful, customizable QR codes with advanced styling options, PWA support, and professional animations.
 
-![QRGenPro Banner](https://via.placeholder.com/800x400/2563eb/ffffff?text=QRGenPro+-+Advanced+QR+Code+Generator)
+![QRloop Banner](https://via.placeholder.com/800x400/2563eb/ffffff?text=QRloop+-+Advanced+QR+Code+Generator)
 
 ## ✨ Features
 
@@ -49,8 +49,8 @@ A modern, feature-rich QR code generator built with React, Vite, and Tailwind CS
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/qrgenpro.git
-   cd qrgenpro
+   git clone https://github.com/yourusername/qrloop.git
+   cd qrloop
    ```
 
 2. **Install dependencies**
@@ -148,6 +148,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
   <p>Made with ❤️ for the developer community</p>
   <p>
-    <a href="#qrgenpro---advanced-qr-code-generator-">⬆ Back to top</a>
+    <a href="#qrloop---advanced-qr-code-generator-">⬆ Back to top</a>
   </p>
 </div>

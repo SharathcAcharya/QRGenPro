@@ -1,40 +1,40 @@
-# QRGenPro PWA - Installation & Usage Guide
+# QRloop PWA - Installation & Usage Guide
 
-## 🚀 About QRGenPro
+## 🚀 About QRloop
 
-QRGenPro is a **Progressive Web App (PWA)** that allows you to create beautiful, customizable QR codes with logos, custom colors, and professional styling. The app works offline and can be installed on any device for quick access.
+QRloop is a **Progressive Web App (PWA)** that allows you to create beautiful, customizable QR codes with logos, custom colors, and professional styling. The app works offline and can be installed on any device for quick access.
 
 ## 📱 PWA Installation Guide
 
 ### For Desktop (Windows, Mac, Linux)
 
 #### Chrome/Edge:
-1. Open QRGenPro in your Chrome or Edge browser
+1. Open QRloop in your Chrome or Edge browser
 2. Look for the **install icon (⊕)** in the address bar
 3. Click the install icon
 4. Click **"Install"** in the popup dialog
-5. QRGenPro will appear as a desktop app in your applications
+5. QRloop will appear as a desktop app in your applications
 
 #### Alternative Method:
 1. Click the **three dots menu (⋯)** in your browser
-2. Select **"Install QRGenPro"** or **"Apps" → "Install this site as an app"**
+2. Select **"Install QRloop"** or **"Apps" → "Install this site as an app"**
 3. Follow the installation prompts
 
 ### For Mobile Devices
 
 #### Android (Chrome):
-1. Open QRGenPro in Chrome mobile browser
+1. Open QRloop in Chrome mobile browser
 2. Tap the **three dots menu (⋮)**
 3. Select **"Add to Home screen"**
 4. Choose a name and tap **"Add"**
-5. Find QRGenPro icon on your home screen
+5. Find QRloop icon on your home screen
 
 #### iOS (Safari):
-1. Open QRGenPro in Safari
+1. Open QRloop in Safari
 2. Tap the **Share button (📤)**
 3. Scroll down and tap **"Add to Home Screen"**
 4. Edit the name if needed and tap **"Add"**
-5. QRGenPro icon will appear on your home screen
+5. QRloop icon will appear on your home screen
 
 #### Android (Other browsers):
 Most modern browsers support PWA installation:
@@ -149,7 +149,7 @@ Most modern browsers support PWA installation:
 
 ## 🚀 Getting Started
 
-1. **Visit the App**: Open QRGenPro in your browser
+1. **Visit the App**: Open QRloop in your browser
 2. **Install**: Click the install button or use browser install option
 3. **Create**: Enter a URL and customize your QR code
 4. **Download**: Save your QR code in high quality
@@ -166,4 +166,4 @@ If you experience any issues with installation or usage:
 
 ---
 
-**QRGenPro** - Create beautiful QR codes anywhere, anytime! 🎨✨
+**QRloop** - Create beautiful QR codes anywhere, anytime! 🎨✨

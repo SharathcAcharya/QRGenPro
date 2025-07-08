@@ -85,7 +85,7 @@ const InstallButton = ({ className, showText = true, onInstallGuide }) => {
     <button
       onClick={handleInstall}
       className={className}
-      title={deferredPrompt ? 'Install QRGenPro as an app' : 'Show installation instructions'}
+      title={deferredPrompt ? 'Install QRloop as an app' : 'Show installation instructions'}
     >
       <IconComponent className="w-4 h-4 md:w-5 md:h-5" />
       {showText && buttonText && (

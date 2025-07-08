@@ -1,7 +1,7 @@
 @echo off
-REM QRGenPro PWA Setup Script for Windows
+REM QRloop PWA Setup Script for Windows
 
-echo 🚀 Setting up QRGenPro PWA...
+echo 🚀 Setting up QRloop PWA...
 
 REM Check if Node.js is installed
 node --version >nul 2>&1

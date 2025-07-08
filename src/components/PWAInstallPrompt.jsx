@@ -49,7 +49,7 @@ const PWAInstallPrompt = () => {
         window.addNotification({
           type: 'success',
           title: 'App Installed!',
-          message: 'QRGenPro has been installed on your device.'
+          message: 'QRloop has been installed on your device.'
         });
       }
     };
@@ -103,7 +103,7 @@ const PWAInstallPrompt = () => {
           window.addNotification({
             type: 'success',
             title: 'Installing...',
-            message: 'QRGenPro is being installed on your device.'
+            message: 'QRloop is being installed on your device.'
           });
         }
       }
@@ -168,7 +168,7 @@ const PWAInstallPrompt = () => {
           
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-              Install QRGenPro
+              Install QRloop
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
               Get the app on your {deviceType} for quick access and offline use.

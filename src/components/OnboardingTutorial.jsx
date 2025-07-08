@@ -6,7 +6,7 @@ const OnboardingTutorial = ({ isOpen, onClose }) => {
 
   const steps = [
     {
-      title: "Welcome to QRGenPro!",
+      title: "Welcome to QRloop!",
       description: "Create beautiful, customizable QR codes in seconds",
       icon: QrCode,
       content: (
@@ -15,7 +15,7 @@ const OnboardingTutorial = ({ isOpen, onClose }) => {
             <QrCode className="w-10 h-10 text-white" />
           </div>
           <p className="text-gray-600 dark:text-gray-300">
-            QRGenPro is the most advanced QR code generator with professional styling,
+            QRloop is the most advanced QR code generator with professional styling,
             custom logos, and beautiful animations.
           </p>
         </div>

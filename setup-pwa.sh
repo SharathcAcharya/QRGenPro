@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# QRGenPro PWA Setup Script
-echo "🚀 Setting up QRGenPro PWA..."
+# QRloop PWA Setup Script
+echo "🚀 Setting up QRloop PWA..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then

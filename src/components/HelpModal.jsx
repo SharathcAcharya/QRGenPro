@@ -55,7 +55,7 @@ const HelpModal = () => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              How to Use QRGenPro
+              How to Use QRloop
             </h2>
             <button
               onClick={() => setIsOpen(false)}

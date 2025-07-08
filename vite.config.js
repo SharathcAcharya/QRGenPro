@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'QRGenPro - Advanced QR Code Generator',
-        short_name: 'QRGenPro',
+        name: 'QRloop - Advanced QR Code Generator',
+        short_name: 'QRloop',
         description: 'Create beautiful, customizable QR codes with logos, custom colors, and professional styling. Perfect for business cards, marketing materials, and personal use.',
         theme_color: '#2563eb',
         background_color: '#ffffff',
