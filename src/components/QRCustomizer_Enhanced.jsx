@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Palette, Settings } from 'lucide-react';
 
 const QRCustomizer = ({ options, onOptionsChange }) => {
-  const [gradientStart, setGradientStart] = useState('#3b82f6');
-  const [gradientEnd, setGradientEnd] = useState('#8b5cf6');
-
   const handleColorChange = (property, value) => {
     onOptionsChange({
       [property]: {
@@ -52,30 +49,11 @@ const QRCustomizer = ({ options, onOptionsChange }) => {
     });
   };
 
-  const handleGradientStartChange = (value) => {
-    setGradientStart(value);
-    // Apply gradient logic here if needed
-  };
-
-  const handleGradientEndChange = (value) => {
-    setGradientEnd(value);
-    // Apply gradient logic here if needed
-  };
-
   const handleGradientChange = (property, gradientData) => {
     onOptionsChange({
       [property]: {
         ...options[property],
         gradient: gradientData
-      }
-    });
-  };
-
-  const handlePatternChange = (property, pattern) => {
-    onOptionsChange({
-      [property]: {
-        ...options[property],
-        pattern: pattern
       }
     });
   };
@@ -91,11 +69,11 @@ const QRCustomizer = ({ options, onOptionsChange }) => {
 
   return (
     <div className="space-y-6">
-      {/* Colors */}
+      {/* Basic Colors */}
       <div className="card">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <Palette className="h-5 w-5 mr-2" />
-          Colors
+          Basic Colors
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -182,14 +160,12 @@ const QRCustomizer = ({ options, onOptionsChange }) => {
             <div className="flex items-center space-x-2">
               <input
                 type="color"
-                value={gradientStart}
-                onChange={(e) => handleGradientStartChange(e.target.value)}
+                defaultValue="#3b82f6"
                 className="h-10 w-16 border border-gray-300 dark:border-gray-600 rounded cursor-pointer"
               />
               <input
                 type="text"
-                value={gradientStart}
-                onChange={(e) => handleGradientStartChange(e.target.value)}
+                defaultValue="#3b82f6"
                 className="input-field"
                 placeholder="#3b82f6"
               />
@@ -202,14 +178,12 @@ const QRCustomizer = ({ options, onOptionsChange }) => {
             <div className="flex items-center space-x-2">
               <input
                 type="color"
-                value={gradientEnd}
-                onChange={(e) => handleGradientEndChange(e.target.value)}
+                defaultValue="#8b5cf6"
                 className="h-10 w-16 border border-gray-300 dark:border-gray-600 rounded cursor-pointer"
               />
               <input
                 type="text"
-                value={gradientEnd}
-                onChange={(e) => handleGradientEndChange(e.target.value)}
+                defaultValue="#8b5cf6"
                 className="input-field"
                 placeholder="#8b5cf6"
               />

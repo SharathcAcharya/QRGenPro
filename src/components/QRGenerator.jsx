@@ -3,12 +3,17 @@ import QRCodeStyling from 'qr-code-styling';
 import QRCustomizer from './QRCustomizer';
 import QRPreview from './QRPreview';
 import QRHistory from './QRHistory';
-import { Link, Upload, Sparkles } from 'lucide-react';
+import BatchQRGenerator from './BatchQRGenerator';
+import QRTemplates from './QRTemplates';
+import QRAnalytics from './QRAnalytics';
+import QRScanner from './QRScanner';
+import { Link, Upload, Sparkles, BarChart3, FileText, Camera, Palette, QrCode, Layers, ScanLine } from 'lucide-react';
 
 const QRGenerator = ({ onQRGenerated }) => {
   const [url, setUrl] = useState('https://example.com');
   const [qrCode, setQrCode] = useState(null);
   const [logoImage, setLogoImage] = useState(null);
+  const [activeTab, setActiveTab] = useState('generator');
   const [qrOptions, setQrOptions] = useState({
     width: 300,
     height: 300,
@@ -107,8 +112,62 @@ const QRGenerator = ({ onQRGenerated }) => {
     setQrOptions(prev => ({ ...prev, ...newOptions }));
   };
 
-  return (
-    <div className="space-y-8">
+  // Tab configuration
+  const tabs = [
+    {
+      id: 'generator',
+      label: 'QR Generator',
+      icon: QrCode,
+      description: 'Create single QR codes'
+    },
+    {
+      id: 'batch',
+      label: 'Batch Generator',
+      icon: Layers,
+      description: 'Generate multiple QR codes'
+    },
+    {
+      id: 'templates',
+      label: 'Templates',
+      icon: FileText,
+      description: 'Pre-designed QR templates'
+    },
+    {
+      id: 'scanner',
+      label: 'Scanner',
+      icon: ScanLine,
+      description: 'Scan & validate QR codes'
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: BarChart3,
+      description: 'Usage statistics'
+    }
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'generator':
+        return renderGeneratorContent();
+      case 'batch':
+        return <BatchQRGenerator onQRGenerated={onQRGenerated} />;
+      case 'templates':
+        return <QRTemplates onTemplateSelect={(template) => {
+          setQrOptions(prev => ({ ...prev, ...template.options }));
+          setActiveTab('generator');
+        }} />;
+      case 'scanner':
+        return <QRScanner />;
+      case 'analytics':
+        return <QRAnalytics />;
+      default:
+        return renderGeneratorContent();
+    }
+  };
+
+  const renderGeneratorContent = () => (
+    <>
       {/* Quick Templates */}
       <div className="card">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
@@ -215,6 +274,39 @@ const QRGenerator = ({ onQRGenerated }) => {
           <QRPreview qrCode={qrCode} qrRef={qrRef} />
           <QRHistory onSelectFromHistory={handleSelectFromHistory} />
         </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="space-y-8">
+      {/* Tab Navigation */}
+      <div className="card">
+        <div className="flex flex-wrap gap-2 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          {tabs.map((tab) => {
+            const IconComponent = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-3 rounded-md font-medium transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-600/50'
+                }`}
+                title={tab.description}
+              >
+                <IconComponent className="w-4 h-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="animate-fadeIn">
+        {renderTabContent()}
       </div>
     </div>
   );
