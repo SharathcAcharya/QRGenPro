@@ -3,6 +3,17 @@
 
 console.log('🚀 Starting Netlify custom build process...');
 
+// Check Node.js version
+const nodeVersion = process.version;
+console.log(`Using Node.js version: ${nodeVersion}`);
+
+// Warn if Node.js version is less than 20.11.0
+const requiredNodeVersion = 'v20.11.0';
+if (nodeVersion.localeCompare(requiredNodeVersion, undefined, { numeric: true }) < 0) {
+  console.warn(`⚠️ Warning: Node.js ${nodeVersion} is being used, but >= ${requiredNodeVersion} is required for camera-controls package.`);
+  console.warn('Please update the NODE_VERSION in netlify.toml to 20.11.0 or higher.');
+}
+
 // Set environment variables to skip ESLint for service worker files
 process.env.SKIP_ESLINT = 'true';
 process.env.ESLINT_NO_DEV_ERRORS = 'true'; 

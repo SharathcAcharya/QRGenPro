@@ -9,6 +9,7 @@
     "build:production": "vite build --mode production",
     "build:nocheck": "cross-env SKIP_ESLINT=true vite build",
     "netlify": "node scripts/netlify-build.js && npm run build:nocheck",
+    "netlify:clean": "cross-env SKIP_IMAGE_OPTIMIZER=true npm run netlify", 
     "prebuild": "npm run lint",
     "postbuild": "npm run optimize",
     "optimize": "node scripts/optimize-assets.js",
@@ -53,5 +54,8 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-plugin-pwa": "^0.20.5",
     "workbox-window": "^7.3.0"
+  },
+  "engines": {
+    "node": ">=20.11.0"
   }
 }

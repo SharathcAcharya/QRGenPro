@@ -8,34 +8,58 @@ import { dirname, resolve } from 'path'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+// Conditionally import plugins based on environment
+const plugins = [react()];
+
+// Add PWA plugin
+plugins.push(
+  VitePWA({
+    registerType: 'autoUpdate',
+    includeAssets: ['icon.svg'],
+    manifest: {
+      name: 'QRloop - Advanced QR Code Generator',
+      short_name: 'QRloop',
+      description: 'Create beautiful, customizable QR codes with logos, custom colors, and professional styling.',
+      theme_color: '#2563eb',
+      background_color: '#ffffff',
+      display: 'standalone',
+      orientation: 'any',
+      scope: '/',
+      start_url: '/',
+      icons: [
+        {
+          src: 'icon.svg',
+          sizes: '192x192',
+          type: 'image/svg+xml',
+          purpose: 'any'
+        }
+      ]
+    }
+  })
+);
+
+// Conditionally load imagemin plugin only if not in SKIP_IMAGE_OPTIMIZER mode
+if (!process.env.SKIP_IMAGE_OPTIMIZER) {
+  try {
+    const imagemin = await import('vite-plugin-imagemin');
+    plugins.push(
+      imagemin.default({
+        gifsicle: { optimizationLevel: 3 },
+        optipng: { optimizationLevel: 5 },
+        mozjpeg: { quality: 75 },
+        pngquant: { quality: [0.7, 0.8], speed: 4 },
+        svgo: { plugins: [{ name: 'removeViewBox', active: false }] },
+      })
+    );
+    console.log('✅ Imagemin plugin loaded successfully');
+  } catch (e) {
+    console.warn('⚠️ Imagemin plugin failed to load, continuing without image optimization:', e.message);
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
-      manifest: {
-        name: 'QRloop - Advanced QR Code Generator',
-        short_name: 'QRloop',
-        description: 'Create beautiful, customizable QR codes with logos, custom colors, and professional styling.',
-        theme_color: '#2563eb',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'any',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: 'icon.svg',
-            sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'any'
-          }
-        ]
-      }
-    })
-  ],
+  plugins,
   
   build: {
     outDir: 'dist',
