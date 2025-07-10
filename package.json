@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:production": "vite build --mode production",
-    "build:nocheck": "cross-env SKIP_ESLINT=true vite build",
+    "build": "cross-env SKIP_IMAGE_OPTIMIZER=true vite build",
+    "build:production": "cross-env SKIP_IMAGE_OPTIMIZER=true vite build --mode production",
+    "build:nocheck": "cross-env SKIP_ESLINT=true SKIP_IMAGE_OPTIMIZER=true vite build",
     "netlify": "node scripts/netlify-build.js && npm run build:nocheck",
     "netlify:clean": "cross-env SKIP_IMAGE_OPTIMIZER=true npm run netlify", 
     "prebuild": "npm run lint:build",
-    "postbuild": "node -e \"require('fs').existsSync('./node_modules/sharp') ? require('child_process').execSync('node scripts/optimize-assets.js') : console.log('Skipping optimization - sharp not installed')\"",
-    "optimize": "node scripts/optimize-assets.js",
+    "postbuild": "node scripts/simple-optimize.js",
+    "optimize": "node scripts/simple-optimize.js",
     "analyze": "vite-bundle-analyzer",
     "lint": "eslint ./src --max-warnings=0",
     "lint:fix": "eslint ./src --fix",
@@ -21,7 +21,9 @@
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "fix-warnings": "node scripts/fix-eslint-warnings.js",
     "fix-file": "node scripts/fix-specific-file.js",
-    "fix-callback": "node scripts/fix-use-callback.js"
+    "fix-callback": "node scripts/fix-use-callback.js",
+    "fix-image-deps": "node scripts/fix-image-deps.js",
+    "postinstall": "npm run fix-image-deps"
   },
   "dependencies": {
     "@react-three/drei": "^10.5.0",
