@@ -1,15 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { CheckCircle, AlertCircle, XCircle, Info, X } from 'lucide-react';
-
-const NotificationContext = createContext();
-
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  return context;
-};
+import NotificationContext, { useNotifications } from '../context/NotificationContext';
 
 const NotificationItem = ({ notification, onRemove }) => {
   const icons = {

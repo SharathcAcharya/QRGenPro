@@ -71,13 +71,13 @@ const QRCodeMesh = React.memo(({ qrImageUrl, animationMode, scale, rotationX, ro
   const texture = useTexture(
     qrImageUrl || placeholderDataURL, 
     // Success callback
-    (loadedTexture) => {
+    (_loadedTexture) => {
       console.log("Texture loaded successfully");
       setTextureError(false);
     },
     // Error callback
-    (error) => {
-      console.error("Failed to load texture:", error);
+    (_error) => {
+      console.error("Failed to load texture");
       setTextureError(true);
     }
   );
@@ -352,7 +352,7 @@ const Scene = React.memo(({ qrImageUrl, animationMode, scale, rotationX, rotatio
 });
 
 // Main component
-const QR3DPreview = ({ qrCode, qrRef, url, logoImage, options }) => {
+const QR3DPreview = ({ qrCode, _qrRef, url, logoImage, options }) => {
   const [is3DMode, setIs3DMode] = useState(false);
   const [rotationX, setRotationX] = useState(0);
   const [rotationY, setRotationY] = useState(0);
@@ -587,7 +587,7 @@ const QR3DPreview = ({ qrCode, qrRef, url, logoImage, options }) => {
       if (qrImageUrl) {
         try {
           URL.revokeObjectURL(qrImageUrl);
-        } catch (e) {
+        } catch (_unused) {
           // Ignore errors from non-blob URLs
         }
       }
@@ -886,8 +886,8 @@ const QR3DPreview = ({ qrCode, qrRef, url, logoImage, options }) => {
                             const style = canvas.style.display;
                             canvas.style.display = 'none';
                             setTimeout(() => { canvas.style.display = style; }, 50);
-                          } catch (e) {
-                            console.error("Failed to restore context:", e);
+                          } catch (_err) {
+                            console.error("Failed to restore context");
                           }
                         }
                       }, 500);

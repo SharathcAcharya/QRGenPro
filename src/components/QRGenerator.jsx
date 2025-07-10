@@ -154,7 +154,7 @@ const QRGenerator = ({ onQRGenerated, activeTab: externalActiveTab, onTabChange 
       const urlObj = new URL(url);
       const hostname = urlObj.hostname.replace('www.', '');
       downloadOptions.name = `qrcode-${hostname}`;
-    } catch (e) {
+    } catch (_unused) {
       // Use default name if URL parsing fails
     }
     

@@ -1,13 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Sparkles, Download, Share2, Copy, Check, Eye, Palette, Brain, Wand2, Layout, Star } from 'lucide-react';
 
-const AIQREnhancer = ({ qrCode, onEnhanceComplete }) => {
+const AIQREnhancer = ({ onEnhanceComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [enhancementType, setEnhancementType] = useState('artistic');
-  const [aiSuggestions, setAiSuggestions] = useState([]);
+  // These states will be used when implementing AI features
+  const [_aiSuggestions, _setAiSuggestions] = useState([]);
   const [selectedStyle, setSelectedStyle] = useState(null);
   const [lastEnhancedOptions, setLastEnhancedOptions] = useState(null);
-  const canvasRef = useRef(null);
+  // Canvas reference for future rendering
+  const _canvasRef = useRef(null);
 
   // Available enhancement categories
   const enhancementTypes = [

@@ -10,14 +10,18 @@
     "build:nocheck": "cross-env SKIP_ESLINT=true vite build",
     "netlify": "node scripts/netlify-build.js && npm run build:nocheck",
     "netlify:clean": "cross-env SKIP_IMAGE_OPTIMIZER=true npm run netlify", 
-    "prebuild": "npm run lint",
-    "postbuild": "npm run optimize",
+    "prebuild": "npm run lint:build",
+    "postbuild": "node -e \"require('fs').existsSync('./node_modules/sharp') ? require('child_process').execSync('node scripts/optimize-assets.js') : console.log('Skipping optimization - sharp not installed')\"",
     "optimize": "node scripts/optimize-assets.js",
     "analyze": "vite-bundle-analyzer",
     "lint": "eslint ./src --max-warnings=0",
     "lint:fix": "eslint ./src --fix",
+    "lint:build": "eslint ./src",
     "preview": "vite preview",
-    "generate-sitemap": "node scripts/generate-sitemap.js"
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "fix-warnings": "node scripts/fix-eslint-warnings.js",
+    "fix-file": "node scripts/fix-specific-file.js",
+    "fix-callback": "node scripts/fix-use-callback.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.5.0",

@@ -41,19 +41,20 @@ plugins.push(
 // Conditionally load imagemin plugin only if not in SKIP_IMAGE_OPTIMIZER mode
 if (!process.env.SKIP_IMAGE_OPTIMIZER) {
   try {
-    const imagemin = await import('vite-plugin-imagemin');
-    plugins.push(
-      imagemin.default({
-        gifsicle: { optimizationLevel: 3 },
-        optipng: { optimizationLevel: 5 },
-        mozjpeg: { quality: 75 },
-        pngquant: { quality: [0.7, 0.8], speed: 4 },
-        svgo: { plugins: [{ name: 'removeViewBox', active: false }] },
-      })
-    );
-    console.log('✅ Imagemin plugin loaded successfully');
+    // Comment out the problematic imagemin plugin
+    // const imagemin = await import('vite-plugin-imagemin');
+    // plugins.push(
+    //   imagemin.default({
+    //     gifsicle: { optimizationLevel: 3 },
+    //     optipng: { optimizationLevel: 5 },
+    //     mozjpeg: { quality: 75 },
+    //     pngquant: { quality: [0.7, 0.8], speed: 4 },
+    //     svgo: { plugins: [{ name: 'removeViewBox', active: false }] },
+    //   })
+    // );
+    console.log('✅ Image optimization disabled - use postbuild script instead');
   } catch (e) {
-    console.warn('⚠️ Imagemin plugin failed to load, continuing without image optimization:', e.message);
+    console.warn('⚠️ Image optimization setup failed:', e.message);
   }
 }
 

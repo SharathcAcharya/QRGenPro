@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, X, Palette, Download, Bell, Moon, Sun } from 'lucide-react';
-import { useDarkMode } from '../App';
+import { useDarkMode } from '../context/DarkModeContext';
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { darkMode, toggleDarkMode } = useDarkMode();

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useDarkMode } from '../App';
 import DarkModeToggle from './DarkModeToggle';
 import InstallButton from './InstallButton';
 import { QrCode, Menu, X, Bell, User, Search, Settings, Sparkles } from 'lucide-react';
@@ -9,7 +8,7 @@ const ModernHeader = ({
   onFeatureTour, 
   onSettingsOpen, 
   onInstallGuide, 
-  totalQRCodes, 
+  _totalQRCodes, // Prefixed with _ to indicate intentionally unused
   onTabChange,
   notifications = [] 
 }) => {
@@ -18,7 +17,6 @@ const ModernHeader = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { darkMode } = useDarkMode();
 
   // Track scroll position for header styling
   useEffect(() => {

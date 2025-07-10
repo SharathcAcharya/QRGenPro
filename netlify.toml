@@ -7,7 +7,7 @@
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ./dev-dist/ ./node_modules/ ./dist/"
 
 [build.environment]
-  SKIP_ESLINT = "true"
+  SKIP_ESLINT = "false"
   NODE_ENV = "production"
   ESLINT_NO_DEV_ERRORS = "true"
   # Skip binary installation for image optimization plugins

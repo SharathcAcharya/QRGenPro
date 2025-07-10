@@ -7,7 +7,7 @@ const QRPreview = ({ qrCode, qrRef, onEnhanceClick, onShareClick, onSaveToLibrar
       qrRef.current.innerHTML = '';
       qrCode.append(qrRef.current);
     }
-  }, [qrCode]);
+  }, [qrCode, qrRef]);
 
   const handleDownload = (format = 'png') => {
     if (qrCode) {
@@ -16,10 +16,9 @@ const QRPreview = ({ qrCode, qrRef, onEnhanceClick, onShareClick, onSaveToLibrar
       let fileName;
       
       try {
-        // Try to extract domain name for URLs
-        const url = new URL(qrContent);
-        fileName = url.hostname.replace('www.', '');
-      } catch (e) {
+        // If not a URL, use the first few characters
+        fileName = qrContent.substring(0, 15).replace(/[^a-z0-9]/gi, '-');
+      } catch (_unused) {
         // If not a URL, use the first few characters
         fileName = qrContent.substring(0, 15).replace(/[^a-z0-9]/gi, '-');
       }

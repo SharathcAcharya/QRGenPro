@@ -11,7 +11,11 @@ export default defineConfig([
     'build/**',
     'node_modules/**',
     '.eslintrc.cjs',
-    'vite.config.js.timestamp-*'
+    'vite.config.js.timestamp-*',
+    'sw.js',
+    'workbox-*.js',
+    'registerSW.js',
+    '**/node_modules/**'
   ]},
   {
     files: ['**/*.{js,jsx}'],
@@ -51,8 +55,13 @@ export default defineConfig([
         ignoreRestSiblings: true 
       }],
       'no-case-declarations': 'off',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-hooks/exhaustive-deps': ['warn', {
+        additionalHooks: '(useRecoilCallback|useRecoilTransaction_UNSTABLE)'
+      }],
+      'react-refresh/only-export-components': ['warn', { 
+        allowConstantExport: true,
+        allowExportNames: ['useDarkMode', 'useNotifications', 'DarkModeProvider', 'NotificationProvider']
+      }],
     },
   },
   // Service worker files
@@ -65,6 +74,13 @@ export default defineConfig([
       'no-constant-condition': 'off',
       'no-cond-assign': 'off',
       'no-func-assign': 'off'
+    }
+  },
+  // Context files
+  {
+    files: ['**/context/*.{js,jsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off'
     }
   }
 ])

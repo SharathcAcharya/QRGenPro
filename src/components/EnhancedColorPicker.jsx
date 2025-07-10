@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Palette, Sparkles, Copy, Check, RotateCcw, Heart } from 'lucide-react';
-import { useDarkMode } from '../App';
+import { useDarkMode } from '../context/DarkModeContext';
 
 const EnhancedColorPicker = ({ 
   color, 
