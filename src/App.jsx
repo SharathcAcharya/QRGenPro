@@ -18,13 +18,6 @@ const FeatureTour = lazy(() => import('./components/FeatureTour'));
 const ParticleBackground = lazy(() => import('./components/ParticleBackground'));
 const ModernHeader = lazy(() => import('./components/ModernHeader'));
 const VoiceCommandSystem = lazy(() => import('./components/VoiceCommandSystem'));
-const { AnimatedBackground, TypewriterText, AnimatedCounter } = lazy(() => import('./components/AnimationComponents')
-  .then(module => ({
-    AnimatedBackground: module.AnimatedBackground,
-    TypewriterText: module.TypewriterText,
-    AnimatedCounter: module.AnimatedCounter
-  }))
-);
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
