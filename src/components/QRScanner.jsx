@@ -230,7 +230,7 @@ const QRScanner = () => {
     try {
       new URL(string);
       return true;
-    } catch (_) {
+    } catch (_unused) {
       return false;
     }
   };

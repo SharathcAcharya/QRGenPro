@@ -186,7 +186,7 @@ const getNameFromURL = (url) => {
     }
     
     return hostname;
-  } catch (_) {
+  } catch (_unused) {
     // If not a valid URL, return a portion of the text
     return url.substring(0, 20) + '...';
   }

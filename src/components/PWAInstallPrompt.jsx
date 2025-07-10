@@ -105,7 +105,7 @@ const PWAInstallPrompt = () => {
             timestamp: new Date().toISOString(),          userAgent: navigator.userAgent
         })
       }).catch(() => console.log('Analytics tracking optional, continuing'));
-      } catch (err) {
+      } catch (_unused) {
         // Silent fail - analytics endpoint is optional
       }
       

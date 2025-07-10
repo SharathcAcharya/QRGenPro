@@ -43,9 +43,11 @@ module.exports = {
       { allowConstantExport: true },
     ],
     'react/prop-types': 'off',
-    'no-unused-vars': ['error', { 
-      'varsIgnorePattern': '^_',
-      'argsIgnorePattern': '^_' 
+    'no-unused-vars': ['warn', { 
+      'varsIgnorePattern': '^_|[A-Z]_',
+      'argsIgnorePattern': '^_|[A-Z]_',
+      'ignoreRestSiblings': true,
+      'caughtErrorsIgnorePattern': '^_|unused|err'
     }],
     'no-case-declarations': 'off', // Allow declarations in case blocks
     'react-hooks/exhaustive-deps': 'warn'

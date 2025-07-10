@@ -780,7 +780,7 @@ const QR3DPreview = ({ qrCode, qrRef, url, logoImage, options }) => {
           </button>
           
           {/* Test Error Handling (developer mode) */}
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.DEV && (
             <button
               type="button"
               className="text-xs text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300"
