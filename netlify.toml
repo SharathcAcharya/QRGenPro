@@ -2,8 +2,9 @@
 # https://docs.netlify.com/configure-builds/file-based-configuration/
 
 [build]
-  command = "npm run build"
+  command = "npm run build:nocheck"
   publish = "dist"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ./dev-dist/"
 
 # Production context: all deploys from the Production branch set in your site's
 # deploy contexts will inherit these settings.

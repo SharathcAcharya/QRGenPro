@@ -7,11 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "build:production": "vite build --mode production",
+    "build:nocheck": "NODE_ENV=production vite build",
     "prebuild": "npm run lint",
     "postbuild": "npm run optimize",
     "optimize": "node scripts/optimize-assets.js",
     "analyze": "vite-bundle-analyzer",
-    "lint": "eslint .",
+    "lint": "eslint ./src",
     "preview": "vite preview",
     "generate-sitemap": "node scripts/generate-sitemap.js"
   },

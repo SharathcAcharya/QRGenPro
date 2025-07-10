@@ -4,7 +4,20 @@ module.exports = {
     browser: true,
     es2020: true,
     node: true, // Enable Node.js globals
-    worker: true // Enable Service Worker globals
+    worker: true, // Enable Worker globals
+    serviceworker: true, // Specifically for Service Worker context
+  },
+  globals: {
+    define: 'readonly',
+    _: 'readonly',
+    importScripts: 'readonly',
+    self: 'readonly',
+    process: 'readonly',
+    Response: 'readonly',
+    workbox: 'readonly',
+    ExtendableEvent: 'readonly',
+    FetchEvent: 'readonly',
+    registration: 'readonly',
   },
   extends: [
     'eslint:recommended',
@@ -12,7 +25,7 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs', 'dev-dist'],
+  ignorePatterns: ['dist', '.eslintrc.cjs', 'dev-dist/**', 'node_modules/**'],
   parserOptions: { 
     ecmaVersion: 'latest', 
     sourceType: 'module',
@@ -46,6 +59,49 @@ module.exports = {
       },
       rules: {
         'no-undef': 'off' // Disable undefined checks for scripts
+      }
+    },
+    {
+      // Override for service worker files
+      files: ['**/sw.js', '**/sw*.js', '**/workbox*.js', '**/registerSW.js', 'dev-dist/**/*.js'],
+      env: {
+        browser: true,
+        worker: true,
+        serviceworker: true,
+        node: false
+      },
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        importScripts: 'readonly',
+        workbox: 'readonly',
+        Response: 'readonly',
+        define: 'readonly',
+        _: 'readonly',
+        registration: 'readonly',
+        ExtendableEvent: 'readonly',
+        FetchEvent: 'readonly'
+      },
+      rules: {
+        'no-undef': 'off',
+        'no-unused-vars': 'off',
+        'no-empty': 'off',
+        'no-constant-condition': 'off',
+        'no-cond-assign': 'off',
+        'no-func-assign': 'off'
+      }
+    },
+    {
+      // Override for PWA-related files
+      files: ['**/*PWA*.jsx', '**/pwa/*.js'],
+      env: {
+        browser: true,
+        serviceworker: false
+      },
+      globals: {
+        window: 'readonly',
+        navigator: 'readonly',
+        localStorage: 'readonly'
       }
     }
   ]

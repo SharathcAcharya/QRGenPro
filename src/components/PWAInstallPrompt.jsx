@@ -6,6 +6,7 @@ const PWAInstallPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [deviceType, setDeviceType] = useState('desktop');
+  // Keep the state variables even if they appear unused - they might be used in other parts of the code
   const [canInstall, setCanInstall] = useState(false);
   const [installMetrics, setInstallMetrics] = useState({
     impressions: 0,
@@ -101,11 +102,10 @@ const PWAInstallPrompt = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             deviceType, 
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent
-          })
-        }).catch(() => console.log('Analytics tracking optional, continuing'));
-      } catch (_) {
+            timestamp: new Date().toISOString(),          userAgent: navigator.userAgent
+        })
+      }).catch(() => console.log('Analytics tracking optional, continuing'));
+      } catch (err) {
         // Silent fail - analytics endpoint is optional
       }
       
