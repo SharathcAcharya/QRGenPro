@@ -1,20 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, Check, X, RefreshCw, AlertCircle, ExternalLink } from 'lucide-react';
+import jsQR from 'jsqr';
 
 const QRScanner = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedData, setScannedData] = useState(null);
   const [error, setError] = useState(null);
   const [hasCamera, setHasCamera] = useState(false);
+  const [scanningProgress, setScanningProgress] = useState(0);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const streamRef = useRef(null);
+  const animationRef = useRef(null);
 
   useEffect(() => {
     checkCameraAvailability();
     return () => {
       stopCamera();
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
   }, []);
 
@@ -25,14 +31,23 @@ const QRScanner = () => {
       setHasCamera(hasVideoDevice);
     } catch (err) {
       setHasCamera(false);
+      setError('Could not detect camera devices. Please ensure camera permissions are enabled.');
+      console.error('Camera detection error:', err);
     }
   };
 
   const startCamera = async () => {
     try {
       setError(null);
+      setScanningProgress(0);
+      
+      // Try to get the best camera for QR scanning (back camera on mobile)
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // Use back camera on mobile
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
       });
       
       if (videoRef.current) {
@@ -40,12 +55,21 @@ const QRScanner = () => {
         streamRef.current = stream;
         setIsScanning(true);
         
-        // Start scanning process
-        setTimeout(scanForQR, 100);
+        // Start scanning process after video is loaded
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play();
+          scanForQR();
+        };
       }
     } catch (err) {
-      setError('Camera access denied. Please allow camera permissions and try again.');
-      console.error('Camera error:', err);
+      console.error('Camera access error:', err);
+      if (err.name === 'NotAllowedError') {
+        setError('Camera access denied. Please allow camera permissions and try again.');
+      } else if (err.name === 'NotFoundError') {
+        setError('No camera found. Please make sure your device has a camera.');
+      } else {
+        setError(`Camera error: ${err.message || 'Unknown error'}`);
+      }
     }
   };
 
@@ -55,14 +79,19 @@ const QRScanner = () => {
       streamRef.current = null;
     }
     setIsScanning(false);
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    setScanningProgress(0);
   };
 
-  const scanForQR = async () => {
+  const scanForQR = () => {
     if (!isScanning || !videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
       canvas.width = video.videoWidth;
@@ -70,32 +99,46 @@ const QRScanner = () => {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       try {
-        // In a real implementation, you would use a QR code library like jsQR
-        // For this demo, we'll simulate QR detection
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
         
-        // Simulate QR code detection (replace with real QR library)
-        if (Math.random() > 0.95) { // Simulate occasional detection
-          const mockQRData = {
-            data: 'https://example.com',
+        if (code) {
+          // Highlight the QR code
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = "#FF3B58";
+          ctx.beginPath();
+          ctx.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
+          ctx.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
+          ctx.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
+          ctx.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
+          ctx.lineTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
+          ctx.stroke();
+          
+          // QR code detected
+          handleQRDetected({
+            data: code.data,
             location: {
-              topLeftCorner: { x: 100, y: 100 },
-              topRightCorner: { x: 200, y: 100 },
-              bottomLeftCorner: { x: 100, y: 200 },
-              bottomRightCorner: { x: 200, y: 200 }
+              topLeftCorner: code.location.topLeftCorner,
+              topRightCorner: code.location.topRightCorner,
+              bottomLeftCorner: code.location.bottomLeftCorner,
+              bottomRightCorner: code.location.bottomRightCorner
             }
-          };
-          handleQRDetected(mockQRData);
+          });
           return;
         }
       } catch (err) {
         console.error('QR scanning error:', err);
       }
+      
+      // Update scanning progress animation
+      setScanningProgress(prev => (prev + 1) % 100);
     }
 
     // Continue scanning
     if (isScanning) {
-      requestAnimationFrame(scanForQR);
+      animationRef.current = requestAnimationFrame(scanForQR);
     }
   };
 
@@ -114,6 +157,7 @@ const QRScanner = () => {
     if (!file) return;
 
     setError(null);
+    setScannedData(null);
     
     try {
       const imageUrl = URL.createObjectURL(file);
@@ -121,7 +165,7 @@ const QRScanner = () => {
       
       img.onload = () => {
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         
         canvas.width = img.width;
         canvas.height = img.height;
@@ -129,24 +173,45 @@ const QRScanner = () => {
         
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        // Simulate QR detection from image
-        // In real implementation, use jsQR or similar library
-        setTimeout(() => {
-          const mockData = 'https://github.com/user/repo'; // Simulate detected data
-          setScannedData({
-            content: mockData,
-            timestamp: new Date().toISOString(),
-            type: detectContentType(mockData),
-            isValid: isValidURL(mockData)
-          });
-        }, 1000);
+        // Use jsQR to detect QR code
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
         
+        if (code) {
+          // Draw the QR code location
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = "#FF3B58";
+          ctx.beginPath();
+          ctx.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
+          ctx.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
+          ctx.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
+          ctx.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
+          ctx.lineTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
+          ctx.stroke();
+          
+          // Set scanned data
+          setScannedData({
+            content: code.data,
+            timestamp: new Date().toISOString(),
+            type: detectContentType(code.data),
+            isValid: isValidURL(code.data)
+          });
+        } else {
+          setError('No QR code found in the image. Please try another image or ensure the QR code is clearly visible.');
+        }
+        
+        URL.revokeObjectURL(imageUrl);
+      };
+      
+      img.onerror = () => {
+        setError('Error loading image. Please try a different file format (JPG, PNG, etc.).');
         URL.revokeObjectURL(imageUrl);
       };
       
       img.src = imageUrl;
     } catch (err) {
-      setError('Failed to process image. Please try another image.');
+      setError('Error processing file: ' + err.message);
     }
   };
 
@@ -155,6 +220,9 @@ const QRScanner = () => {
     if (content.includes('@') && content.includes('.')) return 'Email';
     if (/^\+?[\d\s-()]+$/.test(content)) return 'Phone';
     if (content.startsWith('WIFI:')) return 'WiFi';
+    if (content.startsWith('BEGIN:VCARD')) return 'Contact';
+    if (content.startsWith('geo:')) return 'Location';
+    if (content.startsWith('SMSTO:') || content.startsWith('sms:')) return 'SMS';
     return 'Text';
   };
 
@@ -170,20 +238,27 @@ const QRScanner = () => {
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
+      // Show a temporary success message
+      setError('Copied to clipboard!');
+      setTimeout(() => setError(null), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+      setError('Failed to copy to clipboard. Please try manually selecting and copying the text.');
     }
   };
 
   const openLink = (url) => {
     if (isValidURL(url)) {
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
   const reset = () => {
     setScannedData(null);
     setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -243,10 +318,17 @@ const QRScanner = () => {
               </div>
 
               {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div className={`${
+                  error === 'Copied to clipboard!' 
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' 
+                    : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+                } border rounded-lg p-4`}>
                   <div className="flex items-center space-x-2">
-                    <AlertCircle className="w-5 h-5 text-red-500" />
-                    <p className="text-red-700 dark:text-red-300">{error}</p>
+                    {error === 'Copied to clipboard!' 
+                      ? <Check className="w-5 h-5 text-green-500" /> 
+                      : <AlertCircle className="w-5 h-5 text-red-500" />
+                    }
+                    <p>{error}</p>
                   </div>
                 </div>
               )}
@@ -265,7 +347,10 @@ const QRScanner = () => {
                   className="w-full h-64 object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-48 h-48 border-2 border-white border-dashed rounded-lg"></div>
+                  <div className="w-48 h-48 border-2 border-white border-dashed rounded-lg">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-green-500 opacity-70" 
+                         style={{ width: `${scanningProgress}%`, transition: 'width 0.3s ease-in-out' }}></div>
+                  </div>
                 </div>
               </div>
               <div className="flex justify-center space-x-3">

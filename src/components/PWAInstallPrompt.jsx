@@ -7,11 +7,29 @@ const PWAInstallPrompt = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [deviceType, setDeviceType] = useState('desktop');
   const [canInstall, setCanInstall] = useState(false);
+  const [installMetrics, setInstallMetrics] = useState({
+    impressions: 0,
+    engagements: 0,
+    installations: 0
+  });
 
   useEffect(() => {
-    // Detect device type
+    // Detect if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true) {
+      setIsInstalled(true);
+      setCanInstall(false);
+      
+      // Track installed sessions for analytics
+      const installedSessions = parseInt(localStorage.getItem('pwa-installed-sessions') || '0');
+      localStorage.setItem('pwa-installed-sessions', (installedSessions + 1).toString());
+      
+      return; // Already installed, no need to show prompt
+    }
+    
+    // Detect device type with more precise detection for SEO metrics
     const userAgent = navigator.userAgent.toLowerCase();
-    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isMobile = /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
     const isTablet = /ipad|android(?=.*tablet)|kindle|silk/i.test(userAgent);
     
     if (isMobile && !isTablet) {
@@ -22,11 +40,36 @@ const PWAInstallPrompt = () => {
       setDeviceType('desktop');
     }
 
+    // Load existing metrics
+    const metrics = JSON.parse(localStorage.getItem('pwa-install-metrics') || JSON.stringify({
+      impressions: 0,
+      engagements: 0,
+      installations: 0,
+      lastPromptDate: null,
+      deviceTypes: { mobile: 0, tablet: 0, desktop: 0 }
+    }));
+    
+    setInstallMetrics(metrics);
+
     const handleBeforeInstallPrompt = (e) => {
       console.log('beforeinstallprompt fired');
       e.preventDefault();
       setDeferredPrompt(e);
       setCanInstall(true);
+      
+      // Update impression metrics
+      const updatedMetrics = {
+        ...metrics,
+        impressions: metrics.impressions + 1,
+        deviceTypes: {
+          ...metrics.deviceTypes,
+          [deviceType]: (metrics.deviceTypes[deviceType] || 0) + 1
+        },
+        lastPromptDate: new Date().toISOString()
+      };
+      
+      localStorage.setItem('pwa-install-metrics', JSON.stringify(updatedMetrics));
+      setInstallMetrics(updatedMetrics);
       
       // Show prompt after a delay if not dismissed recently
       const dismissed = localStorage.getItem('pwa-prompt-dismissed');
@@ -43,6 +86,30 @@ const PWAInstallPrompt = () => {
       setShowPrompt(false);
       setDeferredPrompt(null);
       setCanInstall(false);
+      
+      // Update installation metrics
+      const updatedMetrics = {
+        ...metrics,
+        installations: metrics.installations + 1
+      };
+      
+      localStorage.setItem('pwa-install-metrics', JSON.stringify(updatedMetrics));
+      setInstallMetrics(updatedMetrics);
+      
+      // Track installation for potential server-side analytics
+      try {
+        fetch('/api/track-pwa-install', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            deviceType, 
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent
+          })
+        }).catch(err => console.log('Analytics tracking optional, continuing'));
+      } catch (e) {
+        // Silent fail - analytics endpoint is optional
+      }
       
       // Show success notification
       if (window.addNotification) {
@@ -80,9 +147,18 @@ const PWAInstallPrompt = () => {
       window.removeEventListener('appinstalled', handleAppInstalled);
       clearTimeout(testTimer);
     };
-  }, []);
+  }, [deviceType]);
 
   const handleInstall = async () => {
+    // Update engagement metrics
+    const metrics = JSON.parse(localStorage.getItem('pwa-install-metrics') || '{}');
+    const updatedMetrics = {
+      ...metrics,
+      engagements: (metrics.engagements || 0) + 1
+    };
+    localStorage.setItem('pwa-install-metrics', JSON.stringify(updatedMetrics));
+    setInstallMetrics(updatedMetrics);
+    
     if (!deferredPrompt) {
       // No install prompt available, show manual instructions
       setShowPrompt(true);
@@ -156,65 +232,141 @@ const PWAInstallPrompt = () => {
 
   const DeviceIcon = getDeviceIcon();
 
+  // SEO optimization - add structured data for PWA installation guidance
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Install QRloop PWA",
+    "description": "Steps to install QRloop as a Progressive Web App on your device",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Installation",
+        "text": getInstallInstructions()
+      }
+    ]
+  };
+
+  // Add PWA-related metadata
+  useEffect(() => {
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "MobileApplication",
+      "name": "QRloop - QR Code Generator",
+      "operatingSystem": "Any",
+      "applicationCategory": "UtilityApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    };
+
+    // Update structured data
+    let script = document.querySelector('script[data-pwa-install="true"]');
+    if (!script) {
+      script = document.createElement('script');
+      script.setAttribute('type', 'application/ld+json');
+      script.setAttribute('data-pwa-install', 'true');
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(structuredData);
+
+    // Update meta tags
+    const metaTags = [
+      { name: 'application-name', content: 'QRloop - QR Code Generator' },
+      { name: 'apple-mobile-web-app-capable', content: 'yes' },
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
+      { name: 'apple-mobile-web-app-title', content: 'QRloop' },
+      { name: 'description', content: 'Generate customized QR codes with logo embedding, style options, and 3D effects' },
+      { name: 'format-detection', content: 'telephone=no' },
+      { name: 'mobile-web-app-capable', content: 'yes' },
+      { name: 'theme-color', content: '#3b82f6' }
+    ];
+
+    metaTags.forEach(({ name, content }) => {
+      let meta = document.querySelector(`meta[name="${name}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', name);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    });
+
+    return () => {
+      // Clean up if needed
+      if (script) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-slide-up">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 backdrop-blur-sm">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center animate-pulse-glow">
-              <DeviceIcon className="w-6 h-6 text-white" />
+    <>
+      <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-slide-up">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 backdrop-blur-sm">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center animate-pulse-glow">
+                <DeviceIcon className="w-6 h-6 text-white" />
+              </div>
             </div>
-          </div>
-          
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-              Install QRloop
-            </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
-              Get the app on your {deviceType} for quick access and offline use.
-            </p>
             
-            <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
-              💡 {getInstallInstructions()}
-            </p>
-            
-            <div className="flex space-x-2">
-              {deferredPrompt ? (
-                <button
-                  onClick={handleInstall}
-                  className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
-                >
-                  <Download className="w-3 h-3" />
-                  <span>Install Now</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowPrompt(true)}
-                  className="flex items-center space-x-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Show Guide</span>
-                </button>
-              )}
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                Install QRloop
+              </h3>
+              <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
+                Get the app on your {deviceType} for quick access and offline use.
+              </p>
               
-              <button
-                onClick={handleDismiss}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xs px-2 py-1.5 transition-colors"
-              >
-                Later
-              </button>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+                💡 {getInstallInstructions()}
+              </p>
+              
+              <div className="flex space-x-2">
+                {deferredPrompt ? (
+                  <button
+                    onClick={handleInstall}
+                    className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
+                    aria-label="Install QRloop application"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Install Now</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowPrompt(true)}
+                    className="flex items-center space-x-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
+                    aria-label="Show installation guide"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Show Guide</span>
+                  </button>
+                )}
+                
+                <button
+                  onClick={handleDismiss}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xs px-2 py-1.5 transition-colors"
+                  aria-label="Dismiss installation prompt"
+                >
+                  Later
+                </button>
+              </div>
             </div>
+            
+            <button
+              onClick={handleDismiss}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              aria-label="Close installation prompt"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          
-          <button
-            onClick={handleDismiss}
-            className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

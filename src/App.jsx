@@ -1,15 +1,29 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import QRGenerator from './components/QRGenerator';
+import React, { createContext, useState, useContext, useEffect, Suspense, lazy } from 'react';
 import DarkModeToggle from './components/DarkModeToggle';
-import HelpModal from './components/HelpModal';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
-import SettingsModal from './components/SettingsModal';
-import OnboardingTutorial from './components/OnboardingTutorial';
-import InstallGuideModal from './components/InstallGuideModal';
 import InstallButton from './components/InstallButton';
-import { AnimatedBackground, TypewriterText, AnimatedCounter } from './components/AnimationComponents';
+import FloatingActionButton from './components/FloatingActionButton';
 import { NotificationProvider } from './components/NotificationSystem';
 import { QrCode, Settings, Sparkles, Download } from 'lucide-react';
+import SEOHead from './components/SEOHead';
+
+// Lazy loaded components
+const QRGenerator = lazy(() => import('./components/QRGenerator'));
+const HelpModal = lazy(() => import('./components/HelpModal'));
+const SettingsModal = lazy(() => import('./components/SettingsModal'));
+const OnboardingTutorial = lazy(() => import('./components/OnboardingTutorial'));
+const InstallGuideModal = lazy(() => import('./components/InstallGuideModal'));
+const FeatureTour = lazy(() => import('./components/FeatureTour'));
+const ParticleBackground = lazy(() => import('./components/ParticleBackground'));
+const ModernHeader = lazy(() => import('./components/ModernHeader'));
+const VoiceCommandSystem = lazy(() => import('./components/VoiceCommandSystem'));
+const { AnimatedBackground, TypewriterText, AnimatedCounter } = lazy(() => import('./components/AnimationComponents')
+  .then(module => ({
+    AnimatedBackground: module.AnimatedBackground,
+    TypewriterText: module.TypewriterText,
+    AnimatedCounter: module.AnimatedCounter
+  }))
+);
 
 // Dark Mode Context
 const DarkModeContext = createContext();
@@ -29,6 +43,8 @@ function App() {
   });
   const [showSettings, setShowSettings] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
+  const [showFeatureTour, setShowFeatureTour] = useState(false);
+  const [currentQRTab, setCurrentQRTab] = useState('generator');
   const [totalQRCodes, setTotalQRCodes] = useState(0);
 
   useEffect(() => {
@@ -44,74 +60,161 @@ function App() {
     // Count total QR codes generated
     const history = JSON.parse(localStorage.getItem('qr-history') || '[]');
     setTotalQRCodes(history.length);
+    
+    // Check if user should see feature tour
+    const hasSeenTour = localStorage.getItem('hasSeenFeatureTour');
+    if (!hasSeenTour) {
+      setTimeout(() => setShowFeatureTour(true), 2000);
+    }
   }, []);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
 
+  const handleFeatureTourClose = () => {
+    setShowFeatureTour(false);
+    localStorage.setItem('hasSeenFeatureTour', 'true');
+  };
+
+  const handleFloatingActionSelect = (actionId) => {
+    setCurrentQRTab(actionId);
+  };
+
+  const handleVoiceCommand = (command) => {
+    switch (command) {
+      case 'generate':
+        setCurrentQRTab('generator');
+        break;
+      case 'templates':
+        setCurrentQRTab('templates');
+        break;
+      case 'scanner':
+        setCurrentQRTab('scanner');
+        break;
+      case 'history':
+        setCurrentQRTab('history');
+        break;
+      case 'customize':
+        setCurrentQRTab('generator');
+        // Scroll to customizer section
+        setTimeout(() => {
+          document.querySelector('.qr-customizer-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        break;
+      case 'toggle_dark_mode':
+        toggleDarkMode();
+        break;
+      case 'download_png':
+        // Try to find and click the download button
+        const downloadButton = document.querySelector('[data-action="download-png"]');
+        if (downloadButton) {
+          downloadButton.click();
+        } else {
+          console.log('Download button not found');
+        }
+        break;
+      case 'download_svg':
+        // Try to find and click the SVG download button
+        const svgButton = document.querySelector('[data-action="download-svg"]');
+        if (svgButton) {
+          svgButton.click();
+        } else {
+          console.log('SVG download button not found');
+        }
+        break;
+      case 'add_logo':
+        // Try to find and click the add logo button
+        const logoButton = document.querySelector('[data-action="add-logo"]');
+        if (logoButton) {
+          logoButton.click();
+        } else {
+          console.log('Add logo button not found');
+        }
+        break;
+      case 'change_color':
+        setCurrentQRTab('generator');
+        // Scroll to color picker section
+        setTimeout(() => {
+          document.querySelector('.color-picker-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        break;
+      case 'change_style':
+        setCurrentQRTab('generator');
+        // Scroll to style section
+        setTimeout(() => {
+          document.querySelector('.qr-style-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        break;
+      default:
+        console.log('Command not handled in App:', command);
+    }
+  };
+
+  // Fallback loading component
+  const LoadingFallback = () => (
+    <div className="flex justify-center items-center p-4">
+      <div className="animate-pulse flex space-x-4">
+        <div className="rounded-full bg-gray-300 dark:bg-gray-700 h-12 w-12"></div>
+        <div className="flex-1 space-y-4 py-1">
+          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-5/6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <NotificationProvider>
       <DarkModeContext.Provider value={{ darkMode, toggleDarkMode }}>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 relative overflow-hidden">
+          {/* SEO Head Component */}
+          <SEOHead 
+            title="QRloop - Advanced QR Code Generator with 3D Effects & Analytics"
+            description="Create beautiful, customizable QR codes with logo embedding, 3D visualization, analytics, and advanced styling options. Generate and track QR codes for websites, WiFi, contacts, and more."
+            structuredData={{
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "QRloop",
+              "applicationCategory": "UtilitiesApplication",
+              "operatingSystem": "Web",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "description": "Create beautiful, customizable QR codes with logo embedding, styling options, and 3D effects",
+              "featureList": [
+                "Logo embedding in QR codes",
+                "3D QR code visualization",
+                "Custom colors and styles",
+                "Analytics and tracking",
+                "Offline usage with PWA"
+              ]
+            }}
+            twitterImage="/images/qrloop-twitter-card.png"
+            ogImage="/images/qrloop-social-card.png"
+          />
+
           {/* Animated Background */}
-          <AnimatedBackground />
+          <Suspense fallback={null}>
+            <ParticleBackground />
+          </Suspense>
           
-          {/* Header */}
-          <header className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center h-16">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-glow animate-pulse-glow">
-                    <QrCode className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      QRloop
-                    </h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      <TypewriterText text="Advanced QR Code Generator" speed={50} />
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  {totalQRCodes > 0 && (
-                    <div className="hidden sm:flex items-center space-x-2 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                      <Sparkles className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                        <AnimatedCounter end={totalQRCodes} /> QR codes created
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Install Button - Desktop */}
-                  <InstallButton
-                    className="hidden md:flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg"
-                    showText={true}
-                    onInstallGuide={() => setShowInstallGuide(true)}
-                  />
-
-                  {/* Install Button - Mobile */}
-                  <InstallButton
-                    className="md:hidden p-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 hover:scale-105 shadow-lg"
-                    showText={false}
-                    onInstallGuide={() => setShowInstallGuide(true)}
-                  />
-                  
-                  <button
-                    onClick={() => setShowSettings(true)}
-                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:scale-105"
-                    title="Settings"
-                  >
-                    <Settings className="w-5 h-5" />
-                  </button>
-                  
-                  <DarkModeToggle />
-                </div>
-              </div>
-            </div>
-          </header>
+          {/* Modern Header */}
+          <Suspense fallback={<LoadingFallback />}>
+            <ModernHeader 
+              onFeatureTour={() => setShowFeatureTour(true)}
+              onSettingsOpen={() => setShowSettings(true)}
+              onInstallGuide={() => setShowInstallGuide(true)}
+              totalQRCodes={totalQRCodes}
+              onTabChange={setCurrentQRTab}
+              notifications={[]} // Would be populated from a real notification system
+            />
+          </Suspense>
 
           {/* Main Content */}
           <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -124,6 +227,13 @@ function App() {
                 Perfect for business cards, marketing materials, and personal use.
               </p>
 
+              {/* Voice Command System */}
+              <div className="mt-4 flex justify-center">
+                <Suspense fallback={null}>
+                  <VoiceCommandSystem onCommand={handleVoiceCommand} />
+                </Suspense>
+              </div>
+
               {/* Mobile Install Prompt */}
               <div className="mt-6 md:hidden">
                 <InstallButton
@@ -135,7 +245,22 @@ function App() {
             </div>
             
             <div className="animate-scale-in" style={{ animationDelay: '0.2s' }}>
-              <QRGenerator onQRGenerated={() => setTotalQRCodes(prev => prev + 1)} />
+              <Suspense fallback={
+                <div className="p-8 rounded-lg bg-white dark:bg-gray-800 shadow-lg text-center">
+                  <div className="animate-pulse flex flex-col items-center">
+                    <div className="h-32 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
+                    <div className="h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+                    <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <p className="mt-4 text-gray-600 dark:text-gray-400">Loading QR Generator...</p>
+                </div>
+              }>
+                <QRGenerator 
+                  onQRGenerated={() => setTotalQRCodes(prev => prev + 1)}
+                  activeTab={currentQRTab}
+                  onTabChange={setCurrentQRTab}
+                />
+              </Suspense>
             </div>
           </main>
 
@@ -155,18 +280,36 @@ function App() {
           </footer>
 
           {/* Modals and Components */}
-          <HelpModal />
+          <Suspense fallback={null}>
+            <HelpModal />
+          </Suspense>
           <PWAInstallPrompt />
-          <OnboardingTutorial />
-          <InstallGuideModal 
-            isOpen={showInstallGuide}
-            onClose={() => setShowInstallGuide(false)}
-          />
-          <SettingsModal 
-            isOpen={showSettings} 
-            onClose={() => setShowSettings(false)} 
-          />
+          <Suspense fallback={null}>
+            <OnboardingTutorial />
+          </Suspense>
+          <Suspense fallback={null}>
+            <InstallGuideModal 
+              isOpen={showInstallGuide}
+              onClose={() => setShowInstallGuide(false)}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <SettingsModal 
+              isOpen={showSettings} 
+              onClose={() => setShowSettings(false)} 
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <FeatureTour 
+              isOpen={showFeatureTour}
+              onClose={handleFeatureTourClose}
+              onTabChange={setCurrentQRTab}
+            />
+          </Suspense>
         </div>
+
+        {/* Floating Action Button */}
+        <FloatingActionButton onActionSelect={handleFloatingActionSelect} />
       </DarkModeContext.Provider>
     </NotificationProvider>
   );

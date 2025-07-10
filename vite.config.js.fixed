@@ -1,0 +1,197 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
+import viteCompression from 'vite-plugin-compression'
+import viteImagemin from 'vite-plugin-imagemin'
+import path from 'path'
+
+// https://vite.dev/config/
+export default defineConfig(({ command, mode }) => {
+  const isProduction = mode === 'production';
+  
+  return {
+    plugins: [
+      react(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['icon.svg'],
+        manifest: {
+          name: 'QRloop - Advanced QR Code Generator',
+          short_name: 'QRloop',
+          description: 'Create beautiful, customizable QR codes with logos, custom colors, and professional styling. Perfect for business cards, marketing materials, and personal use.',
+          theme_color: '#2563eb',
+          background_color: '#ffffff',
+          display: 'standalone',
+          orientation: 'any',
+          scope: '/',
+          start_url: '/',
+          categories: ['business', 'productivity', 'utilities'],
+          lang: 'en',
+          dir: 'ltr',
+          icons: [
+            {
+              src: 'icon.svg',
+              sizes: '48x48 72x72 96x96 128x128 192x192 256x256 384x384 512x512',
+              type: 'image/svg+xml',
+              purpose: 'any'
+            },
+            {
+              src: 'icon.svg',
+              sizes: '192x192',
+              type: 'image/svg+xml',
+              purpose: 'maskable'
+            },
+            {
+              src: 'icon.svg',
+              sizes: '512x512',
+              type: 'image/svg+xml',
+              purpose: 'maskable'
+            }
+          ],
+          shortcuts: [
+            {
+              name: 'Create QR Code',
+              short_name: 'Create',
+              description: 'Quickly create a new QR code',
+              url: '/',
+              icons: [{ src: 'icon.svg', sizes: '192x192' }]
+            }
+          ]
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
+                }
+              }
+            },
+            {
+              urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'images-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24 * 30
+                }
+              }
+            }
+          ]
+        },
+        devOptions: {
+          enabled: true,
+          navigateFallback: 'index.html'
+        }
+      }),
+      // Add compression for production builds
+      isProduction && viteCompression({
+        algorithm: 'gzip',
+        ext: '.gz',
+      }),
+      isProduction && viteCompression({
+        algorithm: 'brotliCompress',
+        ext: '.br',
+      }),
+      // Optimize images in production
+      isProduction && viteImagemin({
+        gifsicle: {
+          optimizationLevel: 7,
+          interlaced: false,
+        },
+        optipng: {
+          optimizationLevel: 7,
+        },
+        mozjpeg: {
+          quality: 85,
+        },
+        pngquant: {
+          quality: [0.8, 0.9],
+          speed: 4,
+        },
+        svgo: {
+          plugins: [
+            {
+              name: 'removeViewBox',
+              active: false,
+            },
+            {
+              name: 'removeEmptyAttrs',
+              active: false,
+            },
+          ],
+        },
+      }),
+    ].filter(Boolean),
+    
+    // Build options
+    build: {
+      outDir: 'dist',
+      assetsDir: 'assets',
+      emptyOutDir: true,
+      sourcemap: !isProduction,
+      minify: isProduction ? 'terser' : false,
+      terserOptions: {
+        compress: {
+          drop_console: isProduction,
+          drop_debugger: isProduction,
+        },
+      },
+      // Increase the warning limit to reduce unnecessary warnings
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          // Configure manual chunks to optimize bundle size
+          manualChunks: {
+            // Group React and ReactDOM into a single vendor chunk
+            'vendor-react': ['react', 'react-dom'],
+            // Group QR code related libraries
+            'vendor-qr': ['qr-code-styling'],
+            // Group UI components and icons
+            'vendor-ui': ['lucide-react'],
+            // Group utility libraries
+            'vendor-utils': ['jszip'],
+            // Group 3D related libraries
+            'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
+          }
+        }
+      },
+    },
+    
+    // Resolve aliases
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src')
+      }
+    },
+    
+    // Server options
+    server: {
+      port: 3000,
+      strictPort: false,
+      open: true,
+      cors: true,
+      hmr: {
+        overlay: true,
+      },
+    },
+    
+    // Preview options
+    preview: {
+      port: 4173,
+      strictPort: false,
+      open: true,
+    },
+    
+    // Optimize dependencies
+    optimizeDeps: {
+      include: ['react', 'react-dom', 'lucide-react', 'qr-code-styling', 'three']
+    }
+  };
+});

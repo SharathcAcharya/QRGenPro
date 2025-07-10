@@ -1,0 +1,14 @@
+# QRloop Website Robots.txt
+# https://qrloop.app
+
+User-agent: *
+Allow: /
+
+# Disallow admin and system directories
+Disallow: /admin/
+Disallow: /system/
+Disallow: /tmp/
+Disallow: /dev-dist/
+
+# Sitemap location
+Sitemap: https://qrloop.app/sitemap.xml

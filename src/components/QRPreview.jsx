@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Download, Eye } from 'lucide-react';
+import { Download, Eye, Share2, Brain, Save, Box } from 'lucide-react';
 
-const QRPreview = ({ qrCode, qrRef }) => {
+const QRPreview = ({ qrCode, qrRef, onEnhanceClick, onShareClick, onSaveToLibrary, on3DPreviewClick }) => {
   useEffect(() => {
     if (qrCode && qrRef.current) {
       qrRef.current.innerHTML = '';
@@ -11,8 +11,21 @@ const QRPreview = ({ qrCode, qrRef }) => {
 
   const handleDownload = (format = 'png') => {
     if (qrCode) {
+      // Get the content of the QR code to use in the filename
+      const qrContent = qrCode._options?.data || 'qrcode';
+      let fileName;
+      
+      try {
+        // Try to extract domain name for URLs
+        const url = new URL(qrContent);
+        fileName = url.hostname.replace('www.', '');
+      } catch (e) {
+        // If not a URL, use the first few characters
+        fileName = qrContent.substring(0, 15).replace(/[^a-z0-9]/gi, '-');
+      }
+      
       qrCode.download({
-        name: `qr-code-${Date.now()}`,
+        name: `qrcode-${fileName}-${Date.now()}`,
         extension: format
       });
     }
@@ -35,12 +48,58 @@ const QRPreview = ({ qrCode, qrRef }) => {
       {/* Download Options */}
       <div className="space-y-4">
         <h4 className="text-md font-medium text-gray-900 dark:text-white">
+          Quick Actions
+        </h4>
+        
+        {/* Primary Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <button
+            onClick={on3DPreviewClick}
+            className="btn-gradient flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
+            aria-label="3D Preview"
+            data-action="3d-preview"
+          >
+            <Box className="h-4 w-4" />
+            <span>3D View</span>
+          </button>
+          <button
+            onClick={onEnhanceClick}
+            className="btn-gradient flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+            aria-label="AI Enhance"
+            data-action="ai-enhance"
+          >
+            <Brain className="h-4 w-4" />
+            <span>AI Enhance</span>
+          </button>
+          <button
+            onClick={onShareClick}
+            className="btn-gradient flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+            aria-label="Share QR Code"
+            data-action="share-qr"
+          >
+            <Share2 className="h-4 w-4" />
+            <span>Share</span>
+          </button>
+          <button
+            onClick={onSaveToLibrary}
+            className="btn-gradient flex items-center justify-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+            aria-label="Save to Library"
+            data-action="save-to-library"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save</span>
+          </button>
+        </div>
+
+        <h4 className="text-md font-medium text-gray-900 dark:text-white mt-6">
           Download Options
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             onClick={() => handleDownload('png')}
             className="btn-primary flex items-center justify-center space-x-2"
+            aria-label="Download as PNG"
+            data-action="download-png"
           >
             <Download className="h-4 w-4" />
             <span>Download PNG</span>
@@ -48,6 +107,8 @@ const QRPreview = ({ qrCode, qrRef }) => {
           <button
             onClick={() => handleDownload('svg')}
             className="btn-secondary flex items-center justify-center space-x-2"
+            aria-label="Download as SVG"
+            data-action="download-svg"
           >
             <Download className="h-4 w-4" />
             <span>Download SVG</span>

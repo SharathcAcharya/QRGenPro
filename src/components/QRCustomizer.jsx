@@ -1,9 +1,29 @@
-import React, { useState } from 'react';
-import { Palette, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Palette, Settings, Sliders, Eye, Image, Layout, RefreshCw, Copy, Check, Save, Sparkles } from 'lucide-react';
 
 const QRCustomizer = ({ options, onOptionsChange }) => {
   const [gradientStart, setGradientStart] = useState('#3b82f6');
   const [gradientEnd, setGradientEnd] = useState('#8b5cf6');
+  const [gradientDirection, setGradientDirection] = useState('45deg');
+  const [activeTab, setActiveTab] = useState('colors');
+  const [presetName, setPresetName] = useState('');
+  const [savedPresets, setSavedPresets] = useState(() => {
+    const saved = localStorage.getItem('qr-presets');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [copied, setCopied] = useState(false);
+  const [showGradient, setShowGradient] = useState(false);
+
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
+
+  useEffect(() => {
+    localStorage.setItem('qr-presets', JSON.stringify(savedPresets));
+  }, [savedPresets]);
 
   const handleColorChange = (property, value) => {
     onOptionsChange({

@@ -6,16 +6,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:production": "vite build --mode production",
+    "prebuild": "npm run lint",
+    "postbuild": "npm run optimize",
+    "optimize": "node scripts/optimize-assets.js",
+    "analyze": "vite-bundle-analyzer",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
+    "@react-three/drei": "^10.5.0",
+    "@react-three/fiber": "^9.2.0",
     "@tailwindcss/forms": "^0.5.10",
+    "jsqr": "^1.4.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.525.0",
     "qr-code-styling": "^1.9.2",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-helmet": "^6.1.0",
+    "react-router-dom": "^6.22.3",
+    "three": "^0.178.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
@@ -27,9 +39,15 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "html-minifier-terser": "^7.2.0",
     "postcss": "^8.5.6",
+    "react-helmet": "^6.1.0",
+    "sharp": "^0.33.3",
     "tailwindcss": "^3.4.1",
     "vite": "^5.4.8",
+    "vite-bundle-analyzer": "^1.0.5",
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-imagemin": "^0.6.1",
     "vite-plugin-pwa": "^0.20.5",
     "workbox-window": "^7.3.0"
   }

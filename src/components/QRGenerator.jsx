@@ -1,19 +1,37 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import QRCodeStyling from 'qr-code-styling';
-import QRCustomizer from './QRCustomizer';
 import QRPreview from './QRPreview';
-import QRHistory from './QRHistory';
-import BatchQRGenerator from './BatchQRGenerator';
-import QRTemplates from './QRTemplates';
-import QRAnalytics from './QRAnalytics';
-import QRScanner from './QRScanner';
-import { Link, Upload, Sparkles, BarChart3, FileText, Camera, Palette, QrCode, Layers, ScanLine } from 'lucide-react';
+import { Link, Upload, Sparkles, BarChart3, FileText, Camera, Palette, QrCode, Layers, ScanLine, Brain, Share2, FolderOpen, Users, Box } from 'lucide-react';
+import { 
+  QR3DPreviewSkeleton, 
+  QRCustomizerSkeleton, 
+  QRScannerSkeleton,
+  LoadingFallback
+} from './LoadingSkeletons';
 
-const QRGenerator = ({ onQRGenerated }) => {
+// Lazy loaded components
+const QRCustomizer = lazy(() => import('./QRCustomizer'));
+const ModernQRCustomizer = lazy(() => import('./ModernQRCustomizer'));
+const QRHistory = lazy(() => import('./QRHistory'));
+const BatchQRGenerator = lazy(() => import('./BatchQRGenerator'));
+const QRTemplates = lazy(() => import('./QRTemplates'));
+const QRAnalytics = lazy(() => import('./QRAnalytics'));
+const QRScanner = lazy(() => import('./QRScanner'));
+const AIQREnhancer = lazy(() => import('./AIQREnhancer'));
+const SocialShareWidget = lazy(() => import('./SocialShareWidget'));
+const QRLibraryManager = lazy(() => import('./QRLibraryManager'));
+const AdvancedDashboard = lazy(() => import('./AdvancedDashboard'));
+const CollaborativeWorkspace = lazy(() => import('./CollaborativeWorkspace'));
+const QR3DPreview = lazy(() => import('./QR3DPreview'));
+const QREnhancedAnalytics = lazy(() => import('./QREnhancedAnalytics'));
+const CodeExporter = lazy(() => import('./CodeExporter'));
+const VoiceCommandSystem = lazy(() => import('./VoiceCommandSystem'));
+
+const QRGenerator = ({ onQRGenerated, activeTab: externalActiveTab, onTabChange }) => {
   const [url, setUrl] = useState('https://example.com');
   const [qrCode, setQrCode] = useState(null);
   const [logoImage, setLogoImage] = useState(null);
-  const [activeTab, setActiveTab] = useState('generator');
+  const [activeTab, setActiveTab] = useState(externalActiveTab || 'generator');
   const [qrOptions, setQrOptions] = useState({
     width: 300,
     height: 300,
@@ -74,6 +92,20 @@ const QRGenerator = ({ onQRGenerated }) => {
     }
   }, [qrCode, url, logoImage, qrOptions]);
 
+  // Sync external activeTab changes
+  useEffect(() => {
+    if (externalActiveTab && externalActiveTab !== activeTab) {
+      setActiveTab(externalActiveTab);
+    }
+  }, [externalActiveTab]);
+
+  // Notify parent of tab changes
+  useEffect(() => {
+    if (onTabChange && activeTab !== externalActiveTab) {
+      onTabChange(activeTab);
+    }
+  }, [activeTab, onTabChange]);
+
   const handleUrlChange = (e) => {
     setUrl(e.target.value);
   };
@@ -112,6 +144,34 @@ const QRGenerator = ({ onQRGenerated }) => {
     setQrOptions(prev => ({ ...prev, ...newOptions }));
   };
 
+  const handleDownload = (format = 'png') => {
+    if (!qrCode) return;
+
+    const downloadOptions = { name: `qrcode-${Date.now()}`, extension: format };
+    
+    // Get the file name based on the URL
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.replace('www.', '');
+      downloadOptions.name = `qrcode-${hostname}`;
+    } catch (e) {
+      // Use default name if URL parsing fails
+    }
+    
+    // Trigger download
+    qrCode.download(downloadOptions);
+    
+    // Add to history
+    if (url && url.trim() && window.addToQRHistory) {
+      window.addToQRHistory(url.trim());
+    }
+    
+    // Notify parent component
+    if (onQRGenerated) {
+      onQRGenerated();
+    }
+  };
+
   // Tab configuration
   const tabs = [
     {
@@ -121,16 +181,46 @@ const QRGenerator = ({ onQRGenerated }) => {
       description: 'Create single QR codes'
     },
     {
-      id: 'batch',
-      label: 'Batch Generator',
-      icon: Layers,
-      description: 'Generate multiple QR codes'
+      id: '3d-preview',
+      label: '3D Preview',
+      icon: Box,
+      description: '3D QR code visualization'
     },
     {
       id: 'templates',
       label: 'Templates',
       icon: FileText,
       description: 'Pre-designed QR templates'
+    },
+    {
+      id: 'ai-enhance',
+      label: 'AI Enhance',
+      icon: Brain,
+      description: 'AI-powered QR enhancement'
+    },
+    {
+      id: 'batch',
+      label: 'Batch Generator',
+      icon: Layers,
+      description: 'Generate multiple QR codes'
+    },
+    {
+      id: 'library',
+      label: 'Library',
+      icon: FolderOpen,
+      description: 'Manage your QR codes'
+    },
+    {
+      id: 'collaborate',
+      label: 'Collaborate',
+      icon: Users,
+      description: 'Real-time collaboration'
+    },
+    {
+      id: 'share',
+      label: 'Share',
+      icon: Share2,
+      description: 'Social media sharing'
     },
     {
       id: 'scanner',
@@ -142,7 +232,13 @@ const QRGenerator = ({ onQRGenerated }) => {
       id: 'analytics',
       label: 'Analytics',
       icon: BarChart3,
-      description: 'Usage statistics'
+      description: 'Advanced analytics dashboard'
+    },
+    {
+      id: 'code-export',
+      label: 'Export Code',
+      icon: FileText,
+      description: 'Export as code or configuration'
     }
   ];
 
@@ -150,17 +246,111 @@ const QRGenerator = ({ onQRGenerated }) => {
     switch (activeTab) {
       case 'generator':
         return renderGeneratorContent();
-      case 'batch':
-        return <BatchQRGenerator onQRGenerated={onQRGenerated} />;
+      case '3d-preview':
+        return (
+          <Suspense fallback={<QR3DPreviewSkeleton />}>
+            {qrCode ? (
+              <QR3DPreview 
+                qrCode={qrCode} 
+                qrRef={qrRef} 
+                options={qrOptions}
+                url={url}
+                logoImage={logoImage}
+              />
+            ) : (
+              <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                <div className="text-yellow-600 dark:text-yellow-400 font-medium mb-2">QR Code Not Generated</div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Please generate a QR code first before viewing it in 3D.
+                </p>
+                <button
+                  onClick={() => setActiveTab('generator')}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Return to Generator
+                </button>
+              </div>
+            )}
+          </Suspense>
+        );
       case 'templates':
-        return <QRTemplates onTemplateSelect={(template) => {
-          setQrOptions(prev => ({ ...prev, ...template.options }));
-          setActiveTab('generator');
-        }} />;
+        return (
+          <Suspense fallback={<LoadingFallback message="Loading templates..." />}>
+            <QRTemplates onTemplateSelect={(template) => {
+              setQrOptions(prev => ({ ...prev, ...template.options }));
+              setActiveTab('generator');
+            }} />
+          </Suspense>
+        );
+      case 'ai-enhance':
+        return (
+          <Suspense fallback={<LoadingFallback message="Loading AI enhancer..." />}>
+            <AIQREnhancer 
+              qrCode={qrCode} 
+              onEnhanceComplete={(enhancedOptions) => {
+                setQrOptions(prev => ({ ...prev, ...enhancedOptions }));
+                setActiveTab('generator');
+              }} 
+            />
+          </Suspense>
+        );
+      case 'batch':
+        return (
+          <Suspense fallback={<div className="p-8 text-center">Loading Batch Generator...</div>}>
+            <BatchQRGenerator onQRGenerated={onQRGenerated} />
+          </Suspense>
+        );
+      case 'library':
+        return (
+          <Suspense fallback={<div className="p-8 text-center">Loading Library...</div>}>
+            <QRLibraryManager 
+              onQRSelect={(qrData) => {
+                setUrl(qrData.data);
+                setQrOptions(prev => ({ ...prev, ...qrData.options }));
+                setActiveTab('generator');
+              }} 
+            />
+          </Suspense>
+        );
+      case 'collaborate':
+        return (
+          <Suspense fallback={<div className="p-8 text-center">Loading Workspace...</div>}>
+            <CollaborativeWorkspace 
+              qrCode={qrCode} 
+              onQRUpdate={(newOptions) => {
+                setQrOptions(prev => ({ ...prev, ...newOptions }));
+              }}
+            />
+          </Suspense>
+        );
+      case 'share':
+        return (
+          <Suspense fallback={<div className="p-8 text-center">Loading Share Options...</div>}>
+            <SocialShareWidget 
+              qrCode={qrCode} 
+              qrData={url}
+              customMessage={`Check out this QR code I created with QRloop!`}
+            />
+          </Suspense>
+        );
       case 'scanner':
-        return <QRScanner />;
+        return (
+          <Suspense fallback={<QRScannerSkeleton />}>
+            <QRScanner />
+          </Suspense>
+        );
       case 'analytics':
-        return <QRAnalytics />;
+        return (
+          <Suspense fallback={<LoadingFallback message="Loading analytics..." />}>
+            <QREnhancedAnalytics />
+          </Suspense>
+        );
+      case 'code-export':
+        return (
+          <Suspense fallback={<div className="p-8 text-center">Loading Code Export...</div>}>
+            <CodeExporter qrOptions={qrOptions} url={url} />
+          </Suspense>
+        );
       default:
         return renderGeneratorContent();
     }
@@ -266,13 +456,86 @@ const QRGenerator = ({ onQRGenerated }) => {
           </div>
 
           {/* Customization Options */}
-          <QRCustomizer options={qrOptions} onOptionsChange={handleOptionsChange} />
+          <Suspense fallback={<QRCustomizerSkeleton />}>
+            <ModernQRCustomizer options={qrOptions} onOptionsChange={handleOptionsChange} />
+          </Suspense>
         </div>
 
         {/* Right Panel - Preview and History */}
         <div className="space-y-6">
-          <QRPreview qrCode={qrCode} qrRef={qrRef} />
-          <QRHistory onSelectFromHistory={handleSelectFromHistory} />
+          <QRPreview 
+            qrCode={qrCode} 
+            qrRef={qrRef}
+            on3DPreviewClick={() => setActiveTab('3d-preview')}
+            onEnhanceClick={() => setActiveTab('ai-enhance')}
+            onShareClick={() => setActiveTab('share')}
+            onSaveToLibrary={() => {
+              // Save current QR to library
+              const qrData = {
+                id: Date.now(),
+                data: url,
+                options: qrOptions,
+                createdAt: new Date().toISOString(),
+                name: `QR Code - ${new Date().toLocaleDateString()}`
+              };
+              const library = JSON.parse(localStorage.getItem('qr-library') || '[]');
+              library.unshift(qrData);
+              localStorage.setItem('qr-library', JSON.stringify(library));
+              // Show notification or switch to library tab
+              setActiveTab('library');
+            }}
+          />
+          <Suspense fallback={
+            <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg animate-pulse">
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-3 w-1/3"></div>
+              <div className="flex flex-wrap gap-2">
+                <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          }>
+            <QRHistory onSelectFromHistory={handleSelectFromHistory} />
+          </Suspense>
+          
+          {/* Voice Command Help */}
+          <div className="card bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/10 dark:to-indigo-900/10 mt-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <Sparkles className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
+                Voice Commands
+              </h3>
+              <Suspense fallback={<div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>}>
+                <VoiceCommandSystem 
+                  onCommand={(command) => {
+                    switch(command) {
+                      case 'generate':
+                        handleUrlSubmit();
+                        break;
+                      case 'add_logo':
+                        document.getElementById('logo').click();
+                        break;
+                      case 'download_png':
+                        // Trigger download
+                        if (qrCode) {
+                          qrCode.download({
+                            name: `qr-code-${Date.now()}`,
+                            extension: 'png'
+                          });
+                        }
+                        break;
+                      default:
+                        // Other commands will be handled by parent components
+                        break;
+                    }
+                  }} 
+                />
+              </Suspense>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Try saying "Generate QR", "Download PNG", or "Add Logo" to control with your voice.
+            </p>
+          </div>
         </div>
       </div>
     </>

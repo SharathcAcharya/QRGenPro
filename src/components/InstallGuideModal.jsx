@@ -140,10 +140,10 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Content Area - Scrollable */}
-        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
-          {/* Device Selection */}
-          <div className="lg:w-1/4 p-6 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 flex-shrink-0">
+        {/* Content Area - Flex container with overflow handling */}
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
+          {/* Device Selection - Fixed height with its own scroll */}
+          <div className="lg:w-1/4 p-6 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-y-auto">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-4">
               Choose Your Device
             </h3>
@@ -190,8 +190,8 @@ const InstallGuideModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Installation Instructions - Scrollable */}
-          <div className="lg:w-3/4 flex-1 min-h-0 overflow-y-auto">
+          {/* Installation Instructions - Scrollable content */}
+          <div className="lg:w-3/4 flex-1 overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center space-x-3 mb-6">
                 <DeviceIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
