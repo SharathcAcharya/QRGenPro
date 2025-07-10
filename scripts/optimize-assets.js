@@ -52,7 +52,8 @@ async function optimizeImage(filePath) {
   
   try {
     const image = sharp(filePath);
-    const metadata = await image.metadata();
+    // We don't need to store metadata
+    await image.metadata();
     
     let optimizedImage;
     
@@ -133,7 +134,7 @@ async function processDirectory(dir) {
   try {
     if (!fs.existsSync(distDir)) {
       console.error(`❌ Distribution directory not found: ${distDir}`);
-      process.exit(1);
+      return; // Exit function instead of process
     }
     
     console.log(`📂 Processing directory: ${distDir}`);
@@ -141,6 +142,6 @@ async function processDirectory(dir) {
     console.log('✨ Post-build optimization complete!');
   } catch (error) {
     console.error('❌ Optimization failed:', error);
-    process.exit(1);
+    // Exit function with error
   }
 })();

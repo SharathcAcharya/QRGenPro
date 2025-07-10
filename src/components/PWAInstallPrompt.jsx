@@ -13,6 +13,7 @@ const PWAInstallPrompt = () => {
     installations: 0
   });
 
+  // Detect device type and check installation status
   useEffect(() => {
     // Detect if app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches || 
@@ -69,7 +70,6 @@ const PWAInstallPrompt = () => {
       };
       
       localStorage.setItem('pwa-install-metrics', JSON.stringify(updatedMetrics));
-      setInstallMetrics(updatedMetrics);
       
       // Show prompt after a delay if not dismissed recently
       const dismissed = localStorage.getItem('pwa-prompt-dismissed');
@@ -85,7 +85,6 @@ const PWAInstallPrompt = () => {
       setIsInstalled(true);
       setShowPrompt(false);
       setDeferredPrompt(null);
-      setCanInstall(false);
       
       // Update installation metrics
       const updatedMetrics = {
@@ -94,7 +93,6 @@ const PWAInstallPrompt = () => {
       };
       
       localStorage.setItem('pwa-install-metrics', JSON.stringify(updatedMetrics));
-      setInstallMetrics(updatedMetrics);
       
       // Track installation for potential server-side analytics
       try {
@@ -106,8 +104,8 @@ const PWAInstallPrompt = () => {
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent
           })
-        }).catch(err => console.log('Analytics tracking optional, continuing'));
-      } catch (e) {
+        }).catch(() => console.log('Analytics tracking optional, continuing'));
+      } catch (_) {
         // Silent fail - analytics endpoint is optional
       }
       
@@ -138,7 +136,7 @@ const PWAInstallPrompt = () => {
     const testTimer = setTimeout(() => {
       if (!deferredPrompt && !isStandalone) {
         console.log('No install prompt detected, checking if we can show manual instructions');
-        setCanInstall(true);
+        // Just log, don't attempt to update state
       }
     }, 5000);
 
@@ -147,108 +145,13 @@ const PWAInstallPrompt = () => {
       window.removeEventListener('appinstalled', handleAppInstalled);
       clearTimeout(testTimer);
     };
-  }, [deviceType]);
+  }, [deviceType, deferredPrompt]);
 
-  const handleInstall = async () => {
-    // Update engagement metrics
-    const metrics = JSON.parse(localStorage.getItem('pwa-install-metrics') || '{}');
-    const updatedMetrics = {
-      ...metrics,
-      engagements: (metrics.engagements || 0) + 1
-    };
-    localStorage.setItem('pwa-install-metrics', JSON.stringify(updatedMetrics));
-    setInstallMetrics(updatedMetrics);
-    
-    if (!deferredPrompt) {
-      // No install prompt available, show manual instructions
-      setShowPrompt(true);
-      return;
-    }
-
-    try {
-      console.log('Triggering install prompt');
-      const result = await deferredPrompt.prompt();
-      console.log('Install prompt result:', result);
-      
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log('User choice:', outcome);
-      
-      if (outcome === 'accepted') {
-        setShowPrompt(false);
-        if (window.addNotification) {
-          window.addNotification({
-            type: 'success',
-            title: 'Installing...',
-            message: 'QRloop is being installed on your device.'
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Install failed:', error);
-      // Fallback to manual instructions
-      setShowPrompt(true);
-    }
-    
-    setDeferredPrompt(null);
-  };
-
-  const handleDismiss = () => {
-    setShowPrompt(false);
-    setCanInstall(false);
-    localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
-  };
-
-  const getDeviceIcon = () => {
-    switch (deviceType) {
-      case 'mobile': return Smartphone;
-      case 'tablet': return Tablet;
-      default: return Monitor;
-    }
-  };
-
-  const getInstallInstructions = () => {
-    switch (deviceType) {
-      case 'mobile':
-        if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-          return 'Tap Share button (📤) → "Add to Home Screen"';
-        }
-        return 'Tap menu (⋮) → "Add to Home screen"';
-      case 'tablet':
-        return 'Use "Add to Home Screen" from browser options';
-      default:
-        return 'Look for install icon (⊕) in address bar or use browser menu';
-    }
-  };
-
-  // Don't show if installed
-  if (isInstalled) {
-    return null;
-  }
-
-  // Only show if we have explicit prompt or can install
-  if (!showPrompt) {
-    return null;
-  }
-
-  const DeviceIcon = getDeviceIcon();
-
-  // SEO optimization - add structured data for PWA installation guidance
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    "name": "How to Install QRloop PWA",
-    "description": "Steps to install QRloop as a Progressive Web App on your device",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Installation",
-        "text": getInstallInstructions()
-      }
-    ]
-  };
-
-  // Add PWA-related metadata
+  // Add PWA-related metadata and structured data
   useEffect(() => {
+    // Skip if already installed
+    if (isInstalled) return;
+
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "MobileApplication",
@@ -300,73 +203,152 @@ const PWAInstallPrompt = () => {
         document.head.removeChild(script);
       }
     };
-  }, []);
+  }, [deviceType, isInstalled]);
+
+  const handleInstall = async () => {
+    // Update engagement metrics
+    const metrics = JSON.parse(localStorage.getItem('pwa-install-metrics') || '{}');
+    const updatedMetrics = {
+      ...metrics,
+      engagements: (metrics.engagements || 0) + 1
+    };
+    localStorage.setItem('pwa-install-metrics', JSON.stringify(updatedMetrics));
+    
+    if (!deferredPrompt) {
+      // No install prompt available, show manual instructions
+      setShowPrompt(true);
+      return;
+    }
+
+    try {
+      console.log('Triggering install prompt');
+      const result = await deferredPrompt.prompt();
+      console.log('Install prompt result:', result);
+      
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('User choice:', outcome);
+      
+      if (outcome === 'accepted') {
+        setShowPrompt(false);
+        if (window.addNotification) {
+          window.addNotification({
+            type: 'success',
+            title: 'Installing...',
+            message: 'QRloop is being installed on your device.'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Install failed:', error);
+      // Fallback to manual instructions
+      setShowPrompt(true);
+    }
+    
+    setDeferredPrompt(null);
+  };
+
+  const handleDismiss = () => {
+    setShowPrompt(false);
+    localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
+  };
+
+  const getDeviceIcon = () => {
+    switch (deviceType) {
+      case 'mobile': return Smartphone;
+      case 'tablet': return Tablet;
+      default: return Monitor;
+    }
+  };
+
+  const getInstallInstructions = () => {
+    switch (deviceType) {
+      case 'mobile':
+        if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+          return 'Tap Share button (📤) → "Add to Home Screen"';
+        }
+        return 'Tap menu (⋮) → "Add to Home screen"';
+      case 'tablet':
+        return 'Use "Add to Home Screen" from browser options';
+      default:
+        return 'Look for install icon (⊕) in address bar or use browser menu';
+    }
+  };
+
+  // Don't render anything if installed
+  if (isInstalled) {
+    return null;
+  }
+  
+  // Only show if we should show prompt
+  if (!showPrompt) {
+    return null;
+  }
+
+  const DeviceIcon = getDeviceIcon();
 
   return (
-    <>
-      <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-slide-up">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 backdrop-blur-sm">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center animate-pulse-glow">
-                <DeviceIcon className="w-6 h-6 text-white" />
-              </div>
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-slide-up">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 backdrop-blur-sm">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center animate-pulse-glow">
+              <DeviceIcon className="w-6 h-6 text-white" />
             </div>
-            
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                Install QRloop
-              </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
-                Get the app on your {deviceType} for quick access and offline use.
-              </p>
-              
-              <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
-                💡 {getInstallInstructions()}
-              </p>
-              
-              <div className="flex space-x-2">
-                {deferredPrompt ? (
-                  <button
-                    onClick={handleInstall}
-                    className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
-                    aria-label="Install QRloop application"
-                  >
-                    <Download className="w-3 h-3" />
-                    <span>Install Now</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setShowPrompt(true)}
-                    className="flex items-center space-x-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
-                    aria-label="Show installation guide"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Show Guide</span>
-                  </button>
-                )}
-                
-                <button
-                  onClick={handleDismiss}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xs px-2 py-1.5 transition-colors"
-                  aria-label="Dismiss installation prompt"
-                >
-                  Later
-                </button>
-              </div>
-            </div>
-            
-            <button
-              onClick={handleDismiss}
-              className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-              aria-label="Close installation prompt"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
+          
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+              Install QRloop
+            </h3>
+            <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
+              Get the app on your {deviceType} for quick access and offline use.
+            </p>
+            
+            <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+              💡 {getInstallInstructions()}
+            </p>
+            
+            <div className="flex space-x-2">
+              {deferredPrompt ? (
+                <button
+                  onClick={handleInstall}
+                  className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
+                  aria-label="Install QRloop application"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>Install Now</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowPrompt(true)}
+                  className="flex items-center space-x-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
+                  aria-label="Show installation guide"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Show Guide</span>
+                </button>
+              )}
+              
+              <button
+                onClick={handleDismiss}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xs px-2 py-1.5 transition-colors"
+                aria-label="Dismiss installation prompt"
+              >
+                Later
+              </button>
+            </div>
+          </div>
+          
+          <button
+            onClick={handleDismiss}
+            className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400"
+            aria-label="Close installation prompt"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

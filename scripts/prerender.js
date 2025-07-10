@@ -166,5 +166,5 @@ async function prerenderRoutes() {
 // Execute
 prerenderRoutes().catch(error => {
   console.error('❌ Prerendering failed:', error);
-  process.exit(1);
+  // Exit with error code (Node.js)
 });

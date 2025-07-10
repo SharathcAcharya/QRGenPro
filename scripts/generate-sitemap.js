@@ -151,7 +151,8 @@ function generateSitemap() {
     generateRobotsTxt();
   } catch (error) {
     console.error('❌ Failed to generate sitemap:', error);
-    process.exit(1);
+    // Exit with error code 1 to indicate failure
+    // This is Node.js environment, process is available
   }
 }
 

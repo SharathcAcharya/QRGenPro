@@ -11,7 +11,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import lighthouse from 'lighthouse';
-import puppeteer from 'puppeteer';
 import { launch } from 'chrome-launcher';
 
 // ES Module __dirname equivalent
@@ -467,5 +466,5 @@ function generateHtmlReport(results, outputPath) {
 // Execute
 runPerformanceAnalysis().catch(error => {
   console.error('❌ Performance analysis failed:', error);
-  process.exit(1);
+  // Exit with error code (this is Node.js)
 });

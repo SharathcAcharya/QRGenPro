@@ -1,0 +1,5 @@
+# Ignore dev-dist (service worker and workbox files)
+dev-dist/
+# Ignore build files
+dist/
+build/
