@@ -10,7 +10,6 @@ const ModernQRCustomizer = ({ options, onOptionsChange }) => {
     return saved ? JSON.parse(saved) : [];
   });
   const [copied, setCopied] = useState(false);
-  const [showGradient, setShowGradient] = useState(false);
 
   useEffect(() => {
     if (copied) {

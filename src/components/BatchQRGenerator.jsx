@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Download, Upload, Plus, Trash2, FileText, CheckCircle, X } from 'lucide-react';
 import QRCodeStyling from 'qr-code-styling';
 import JSZip from 'jszip';
 import defaultOptions from '../utils/defaultQROptions';
 
-const BatchQRGenerator = ({ onQRGenerated }) => {
+const BatchQRGenerator = () => {
   const [urls, setUrls] = useState([{ id: 1, url: '', name: '', status: 'pending' }]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [qrCodes, setQrCodes] = useState([]);

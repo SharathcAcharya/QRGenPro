@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart3, TrendingUp, Users, Zap, Globe, Smartphone, Eye, Download, Share2, Star, ArrowUpRight, Calendar, Clock, Target } from 'lucide-react';
 
 const AdvancedDashboard = () => {
@@ -13,13 +13,7 @@ const AdvancedDashboard = () => {
     geographicData: []
   });
 
-  useEffect(() => {
-    loadDashboardData();
-    const interval = setInterval(loadDashboardData, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadDashboardData = () => {
+  const loadDashboardData = useCallback(() => {
     // Load from localStorage and simulate real-time data
     const qrHistory = JSON.parse(localStorage.getItem('qr-history') || '[]');
     const qrLibrary = JSON.parse(localStorage.getItem('qr-library') || '[]');
@@ -40,10 +34,16 @@ const AdvancedDashboard = () => {
       deviceBreakdown: generateDeviceBreakdown(),
       geographicData: generateGeographicData()
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+    const interval = setInterval(loadDashboardData, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, [loadDashboardData]);
 
   const generateTopPerformers = (library) => {
-    return library.slice(0, 5).map((qr, index) => ({
+    return library.slice(0, 5).map((qr) => ({
       id: qr.id,
       name: qr.name || `QR Code #${qr.id}`,
       scans: Math.floor(Math.random() * 100 + 10),
@@ -136,13 +136,13 @@ const AdvancedDashboard = () => {
     <div className="card p-6">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Top Performing QR Codes</h3>
       <div className="space-y-4">
-        {stats.topPerformers.map((performer, index) => (
+        {stats.topPerformers.map((performer, _index) => (
           <div key={performer.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
             <div className="flex items-center space-x-3">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
-                index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-amber-600' : 'bg-blue-500'
+                _index === 0 ? 'bg-yellow-500' : _index === 1 ? 'bg-gray-400' : _index === 2 ? 'bg-amber-600' : 'bg-blue-500'
               }`}>
-                {index + 1}
+                {_index + 1}
               </div>
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">{performer.name}</p>
@@ -297,7 +297,7 @@ const AdvancedDashboard = () => {
       <div className="card p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Geographic Distribution</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {stats.geographicData.map((geo, index) => (
+          {stats.geographicData.map((geo) => (
             <div key={geo.country} className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
               <div className="text-2xl mb-2">{geo.flag}</div>
               <p className="font-medium text-gray-900 dark:text-white text-sm">{geo.country}</p>

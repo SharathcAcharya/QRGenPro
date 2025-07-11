@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Mic, MicOff, Volume2, XCircle, Command, HelpCircle, Volume, Zap } from 'lucide-react';
 
 const VoiceCommandSystem = ({ onCommand }) => {
@@ -11,7 +11,7 @@ const VoiceCommandSystem = ({ onCommand }) => {
   const recognitionRef = useRef(null);
   
   // Available voice commands
-  const commands = {
+  const commands = useMemo(() => ({
     'generate': () => onCommand('generate'),
     'create qr': () => onCommand('generate'),
     'generate qr': () => onCommand('generate'),
@@ -44,7 +44,34 @@ const VoiceCommandSystem = ({ onCommand }) => {
       setShowCommands(false);
       return 'dialog_closed';
     }
-  };
+  }), [onCommand]);
+  
+  const provideFeedback = useCallback((message) => {
+    setFeedback(message);
+    // Keep feedback visible for 3 seconds
+    setTimeout(() => setFeedback(''), 3000);
+  }, []);
+  
+  const processCommand = useCallback((text) => {
+    let foundCommand = false;
+    
+    for (const [commandText, action] of Object.entries(commands)) {
+      if (text.includes(commandText)) {
+        const result = action();
+        foundCommand = true;
+        
+        if (result !== 'dialog_closed') {
+          provideFeedback(`Executing: ${commandText}`);
+        }
+        
+        break;
+      }
+    }
+    
+    if (!foundCommand) {
+      provideFeedback(`Command not recognized: "${text}"`);
+    }
+  }, [commands, provideFeedback]);
   
   // Setup speech recognition
   useEffect(() => {
@@ -125,7 +152,7 @@ const VoiceCommandSystem = ({ onCommand }) => {
         recognitionRef.current.abort();
       }
     };
-  }, []);
+  }, [isListening, processCommand, provideFeedback]);
   
   const toggleListening = () => {
     if (isListening) {
@@ -165,33 +192,6 @@ const VoiceCommandSystem = ({ onCommand }) => {
       console.error('Failed to start speech recognition:', error);
       provideFeedback('Failed to start speech recognition. Please try again.');
     }
-  };
-  
-  const processCommand = (text) => {
-    let foundCommand = false;
-    
-    for (const [commandText, action] of Object.entries(commands)) {
-      if (text.includes(commandText)) {
-        const result = action();
-        foundCommand = true;
-        
-        if (result !== 'dialog_closed') {
-          provideFeedback(`Executing: ${commandText}`);
-        }
-        
-        break;
-      }
-    }
-    
-    if (!foundCommand) {
-      provideFeedback(`Command not recognized: "${text}"`);
-    }
-  };
-  
-  const provideFeedback = (message) => {
-    setFeedback(message);
-    // Keep feedback visible for 3 seconds
-    setTimeout(() => setFeedback(''), 3000);
   };
   
   // Get the command categories for help display

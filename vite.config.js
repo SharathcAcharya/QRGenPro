@@ -117,6 +117,11 @@ if (!process.env.SKIP_IMAGE_OPTIMIZER) {
 export default defineConfig({
   plugins,
   
+  // Force rollup to use JS implementation to avoid native dependency issues
+  esbuild: {
+    target: 'esnext'
+  },
+  
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -126,6 +131,13 @@ export default defineConfig({
     
     // Configure Rollup options for better chunking
     rollupOptions: {
+      external: (id) => {
+        // Ignore problematic native dependencies
+        if (id.includes('@rollup/rollup-win32-x64-msvc')) {
+          return true;
+        }
+        return false;
+      },
       output: {
         // Configure manual chunks for better code splitting
         manualChunks: (id) => {

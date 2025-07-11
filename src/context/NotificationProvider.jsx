@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { CheckCircle, AlertCircle, XCircle, Info, X } from 'lucide-react';
-import NotificationContext, { useNotifications } from '../context/NotificationContext';
+import NotificationContext from './NotificationContext';
 
 const NotificationItem = ({ notification, onRemove }) => {
   const icons = {
@@ -20,11 +20,7 @@ const NotificationItem = ({ notification, onRemove }) => {
   const Icon = icons[notification.type];
 
   return (
-    <div className={`
-      border rounded-lg p-4 shadow-lg backdrop-blur-sm
-      animate-slide-down transition-all duration-300
-      ${colors[notification.type]}
-    `}>
+    <div className={`p-4 rounded-lg border-l-4 shadow-sm ${colors[notification.type]} mb-3 animate-slide-in`}>
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
           <Icon className="w-5 h-5" />
@@ -49,6 +45,10 @@ const NotificationItem = ({ notification, onRemove }) => {
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
+  const removeNotification = useCallback((id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
   const addNotification = useCallback((notification) => {
     const id = Date.now() + Math.random();
     const newNotification = {
@@ -60,35 +60,30 @@ export const NotificationProvider = ({ children }) => {
 
     setNotifications(prev => [...prev, newNotification]);
 
-    // Auto-remove after duration
+    // Auto remove after duration
     if (newNotification.duration > 0) {
       setTimeout(() => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
+        removeNotification(id);
       }, newNotification.duration);
     }
+  }, [removeNotification]);
 
-    return id;
-  }, []);
-
-  const removeNotification = useCallback((id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  }, []);
-
-  const clearAllNotifications = useCallback(() => {
+  const clearAll = useCallback(() => {
     setNotifications([]);
   }, []);
 
+  const value = {
+    notifications,
+    addNotification,
+    removeNotification,
+    clearAll
+  };
+
   return (
-    <NotificationContext.Provider value={{
-      notifications,
-      addNotification,
-      removeNotification,
-      clearAllNotifications
-    }}>
+    <NotificationContext.Provider value={value}>
       {children}
-      
-      {/* Notification Container */}
-      <div className="fixed top-4 right-4 z-50 space-y-3 max-w-sm w-full">
+      {/* Notification container */}
+      <div className="fixed top-4 right-4 z-50 max-w-sm space-y-2">
         {notifications.map(notification => (
           <NotificationItem
             key={notification.id}
@@ -100,3 +95,5 @@ export const NotificationProvider = ({ children }) => {
     </NotificationContext.Provider>
   );
 };
+
+export default NotificationProvider;

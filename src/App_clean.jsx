@@ -7,7 +7,7 @@ import SettingsModal from './components/SettingsModal';
 import OnboardingTutorial from './components/OnboardingTutorial';
 import InstallGuideModal from './components/InstallGuideModal';
 import { AnimatedBackground, TypewriterText, AnimatedCounter } from './components/AnimationComponents';
-import { NotificationProvider } from './components/NotificationSystem';
+import { NotificationProvider } from './context/NotificationProvider';
 import { QrCode, Settings, Sparkles, Download } from 'lucide-react';
 
 // Dark Mode Context

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Disc, Compass } from 'lucide-react';
 
-const QR3DControls = ({ animationMode, setAnimationMode, viewMode, setViewMode }) => {
+const QR3DControls = ({ animationMode, setAnimationMode }) => {
   return (
     <div className="absolute bottom-4 left-0 right-0 flex justify-center">
       <div className="bg-black/50 backdrop-blur-sm rounded-full p-2 flex space-x-2">

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -9,8 +9,7 @@ const QR3DMesh = ({
   scale = 1, 
   rotationX = 0, 
   rotationY = 0, 
-  material = 'standard', 
-  previewMode 
+  material = 'standard'
 }) => {
   const meshRef = useRef();
   const [textureError, setTextureError] = useState(false);

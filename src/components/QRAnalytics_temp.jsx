@@ -115,7 +115,7 @@ const QRAnalytics = () => {
   }, [loadAnalytics]);
 
   // Stat Card component
-  const StatCard = ({ icon: Icon, title, value, subtitle, trend }) => {
+  const StatCard = ({ icon: Icon, title, value, trend }) => {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex items-center space-x-4">

@@ -4,7 +4,7 @@ import PWAInstallPrompt from './components/PWAInstallPrompt';
 import PWAInstallLogger from './components/PWAInstallLogger';
 import InstallButton from './components/InstallButton';
 import FloatingActionButton from './components/FloatingActionButton';
-import { NotificationProvider } from './components/NotificationSystem';
+import { NotificationProvider } from './context/NotificationProvider';
 import { QrCode, Settings, Sparkles, Download } from 'lucide-react';
 import SEOHead from './components/SEOHead';
 import { DarkModeProvider } from './context/DarkModeContext';

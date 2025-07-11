@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { History, Clock, ExternalLink, Trash2 } from 'lucide-react';
 
 const QRHistory = ({ onSelectFromHistory }) => {
@@ -11,12 +11,14 @@ const QRHistory = ({ onSelectFromHistory }) => {
     }
   }, []);
 
-  const addToHistory = (url, timestamp = Date.now()) => {
+  const addToHistory = useCallback((url, timestamp = Date.now()) => {
     const newEntry = { url, timestamp, id: timestamp };
-    const updatedHistory = [newEntry, ...history.filter(item => item.url !== url)].slice(0, 10);
-    setHistory(updatedHistory);
-    localStorage.setItem('qrHistory', JSON.stringify(updatedHistory));
-  };
+    setHistory(prevHistory => {
+      const updatedHistory = [newEntry, ...prevHistory.filter(item => item.url !== url)].slice(0, 10);
+      localStorage.setItem('qrHistory', JSON.stringify(updatedHistory));
+      return updatedHistory;
+    });
+  }, []);
 
   const removeFromHistory = (id) => {
     const updatedHistory = history.filter(item => item.id !== id);
@@ -41,7 +43,7 @@ const QRHistory = ({ onSelectFromHistory }) => {
   // Expose addToHistory function to parent component
   useEffect(() => {
     window.addToQRHistory = addToHistory;
-  }, [history]);
+  }, [addToHistory]);
 
   if (history.length === 0) {
     return (

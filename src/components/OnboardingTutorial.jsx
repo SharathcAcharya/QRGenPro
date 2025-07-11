@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, X, QrCode, Palette, Download, Sparkles } from 'lucide-react';
 
 const OnboardingTutorial = ({ isOpen, onClose }) => {

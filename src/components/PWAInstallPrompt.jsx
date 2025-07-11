@@ -7,13 +7,6 @@ const PWAInstallPrompt = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [deviceType, setDeviceType] = useState('desktop');
   const [showManualInstructions, setShowManualInstructions] = useState(false);
-  // Keep the state variables even if they appear unused - they might be used in other parts of the code
-  const [canInstall, setCanInstall] = useState(false);
-  const [installMetrics, setInstallMetrics] = useState({
-    impressions: 0,
-    engagements: 0,
-    installations: 0
-  });
 
   // Detect device type and check installation status
   useEffect(() => {
@@ -21,7 +14,6 @@ const PWAInstallPrompt = () => {
     if (window.matchMedia('(display-mode: standalone)').matches || 
         window.navigator.standalone === true) {
       setIsInstalled(true);
-      setCanInstall(false);
       
       // Track installed sessions for analytics
       const installedSessions = parseInt(localStorage.getItem('pwa-installed-sessions') || '0');
@@ -51,14 +43,11 @@ const PWAInstallPrompt = () => {
       lastPromptDate: null,
       deviceTypes: { mobile: 0, tablet: 0, desktop: 0 }
     }));
-    
-    setInstallMetrics(metrics);
 
     const handleBeforeInstallPrompt = (e) => {
       console.log('beforeinstallprompt fired');
       e.preventDefault();
       setDeferredPrompt(e);
-      setCanInstall(true);
       
       // Update impression metrics
       const updatedMetrics = {

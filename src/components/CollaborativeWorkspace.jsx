@@ -13,7 +13,6 @@ const CollaborativeWorkspace = memo(({ qrCode, onQRUpdate }) => {
   const [roomId, setRoomId] = useState('');
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isSharing, setIsSharing] = useState(false);
   const [activeUsers, setActiveUsers] = useState([]);
   const [permissions, setPermissions] = useState('viewer'); // viewer, editor, admin
   const [connectionAttempts, setConnectionAttempts] = useState(0);
@@ -82,6 +81,7 @@ const CollaborativeWorkspace = memo(({ qrCode, onQRUpdate }) => {
     return () => {
       cleanupWebSocket();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, currentUser]);
   
   // Handle WebSocket messages

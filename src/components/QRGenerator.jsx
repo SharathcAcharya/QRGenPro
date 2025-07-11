@@ -80,7 +80,7 @@ const QRGenerator = ({ onQRGenerated, activeTab: externalActiveTab, onTabChange 
   useEffect(() => {
     const newQrCode = new QRCodeStyling(qrOptions);
     setQrCode(newQrCode);
-  }, []);
+  }, [qrOptions]);
 
   useEffect(() => {
     if (qrCode) {
@@ -97,14 +97,14 @@ const QRGenerator = ({ onQRGenerated, activeTab: externalActiveTab, onTabChange 
     if (externalActiveTab && externalActiveTab !== activeTab) {
       setActiveTab(externalActiveTab);
     }
-  }, [externalActiveTab]);
+  }, [externalActiveTab, activeTab]);
 
   // Notify parent of tab changes
   useEffect(() => {
     if (onTabChange && activeTab !== externalActiveTab) {
       onTabChange(activeTab);
     }
-  }, [activeTab, onTabChange]);
+  }, [activeTab, onTabChange, externalActiveTab]);
 
   const handleUrlChange = (e) => {
     setUrl(e.target.value);
@@ -142,34 +142,6 @@ const QRGenerator = ({ onQRGenerated, activeTab: externalActiveTab, onTabChange 
 
   const handleOptionsChange = (newOptions) => {
     setQrOptions(prev => ({ ...prev, ...newOptions }));
-  };
-
-  const handleDownload = (format = 'png') => {
-    if (!qrCode) return;
-
-    const downloadOptions = { name: `qrcode-${Date.now()}`, extension: format };
-    
-    // Get the file name based on the URL
-    try {
-      const urlObj = new URL(url);
-      const hostname = urlObj.hostname.replace('www.', '');
-      downloadOptions.name = `qrcode-${hostname}`;
-    } catch (_unused) {
-      // Use default name if URL parsing fails
-    }
-    
-    // Trigger download
-    qrCode.download(downloadOptions);
-    
-    // Add to history
-    if (url && url.trim() && window.addToQRHistory) {
-      window.addToQRHistory(url.trim());
-    }
-    
-    // Notify parent component
-    if (onQRGenerated) {
-      onQRGenerated();
-    }
   };
 
   // Tab configuration

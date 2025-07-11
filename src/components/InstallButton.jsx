@@ -3,7 +3,6 @@ import { Download, Plus } from 'lucide-react';
 
 const InstallButton = ({ className, showText = true, onInstallGuide }) => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
@@ -18,14 +17,12 @@ const InstallButton = ({ className, showText = true, onInstallGuide }) => {
       console.log('Install prompt available');
       e.preventDefault();
       setDeferredPrompt(e);
-      setIsInstallable(true);
     };
 
     const handleAppInstalled = () => {
       console.log('App installed successfully');
       setIsInstalled(true);
       setDeferredPrompt(null);
-      setIsInstallable(false);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -52,7 +49,6 @@ const InstallButton = ({ className, showText = true, onInstallGuide }) => {
         }
         
         setDeferredPrompt(null);
-        setIsInstallable(false);
       } catch (error) {
         console.error('Installation failed:', error);
         // Fallback to install guide

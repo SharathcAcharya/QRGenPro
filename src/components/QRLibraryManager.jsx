@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Folder, Tag, Search, Filter, Grid, List, Archive, Trash2, Download, Share2, Eye, Calendar, Star } from 'lucide-react';
 
 const QRLibraryManager = ({ onQRSelect }) => {
@@ -12,13 +12,13 @@ const QRLibraryManager = ({ onQRSelect }) => {
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
-  const defaultFolders = [
+  const defaultFolders = useMemo(() => [
     { id: 'all', name: 'All QR Codes', icon: Grid, count: 0 },
     { id: 'recent', name: 'Recent', icon: Calendar, count: 0 },
     { id: 'favorites', name: 'Favorites', icon: Star, count: 0 },
     { id: 'archived', name: 'Archived', icon: Archive, count: 0 },
     { id: 'trash', name: 'Trash', icon: Trash2, count: 0 }
-  ];
+  ], []);
 
   const availableTags = [
     { id: 'business', name: 'Business', color: 'bg-blue-500' },
@@ -30,21 +30,21 @@ const QRLibraryManager = ({ onQRSelect }) => {
     { id: 'contact', name: 'Contact', color: 'bg-yellow-500' }
   ];
 
-  useEffect(() => {
-    loadQRCodes();
-    loadFolders();
-  }, []);
-
-  const loadQRCodes = () => {
+  const loadQRCodes = useCallback(() => {
     // Load from localStorage or API
     const savedQRs = JSON.parse(localStorage.getItem('qr-library') || '[]');
     setQrCodes(savedQRs);
-  };
+  }, []);
 
-  const loadFolders = () => {
+  const loadFolders = useCallback(() => {
     const savedFolders = JSON.parse(localStorage.getItem('qr-folders') || '[]');
     setFolders([...defaultFolders, ...savedFolders]);
-  };
+  }, [defaultFolders]);
+
+  useEffect(() => {
+    loadQRCodes();
+    loadFolders();
+  }, [loadQRCodes, loadFolders]);
 
   const createFolder = () => {
     if (!newFolderName.trim()) return;
@@ -84,14 +84,6 @@ const QRLibraryManager = ({ onQRSelect }) => {
     setQrCodes(prev =>
       prev.map(qr =>
         qr.id === qrId ? { ...qr, isDeleted: true, deletedAt: new Date() } : qr
-      )
-    );
-  };
-
-  const moveToFolder = (qrId, folderId) => {
-    setQrCodes(prev =>
-      prev.map(qr =>
-        qr.id === qrId ? { ...qr, folderId } : qr
       )
     );
   };

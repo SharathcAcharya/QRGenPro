@@ -1,4 +1,4 @@
-import React, { useState, useRef, Suspense, lazy } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Box, RotateCw, Download, Share2, Eye } from 'lucide-react';
 import { ThreeJSErrorState } from './LoadingSkeletons';
 
@@ -18,7 +18,7 @@ const Loading3D = () => (
   </div>
 );
 
-const QR3DPreview = ({ qrImageUrl, options, onScreenshot }) => {
+const QR3DPreview = ({ qrImageUrl, onScreenshot }) => {
   const [viewMode, setViewMode] = useState('standard');
   const [animationMode, setAnimationMode] = useState('rotate');
   const [settings, setSettings] = useState({

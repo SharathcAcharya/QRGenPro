@@ -49,5 +49,5 @@ export {
   AnimatedCounter 
 } from './AnimationComponents';
 
-// System Components
-export { NotificationProvider, useNotifications } from './NotificationSystem';
+// System Components - NotificationProvider moved to context/NotificationProvider
+// useNotifications is available from context/NotificationContext

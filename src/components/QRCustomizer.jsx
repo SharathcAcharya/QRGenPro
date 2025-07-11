@@ -4,15 +4,7 @@ import { Palette, Settings, Sliders, Eye, Image, Layout, RefreshCw, Copy, Check,
 const QRCustomizer = ({ options, onOptionsChange }) => {
   const [gradientStart, setGradientStart] = useState('#3b82f6');
   const [gradientEnd, setGradientEnd] = useState('#8b5cf6');
-  const [gradientDirection, setGradientDirection] = useState('45deg');
-  const [activeTab, setActiveTab] = useState('colors');
-  const [presetName, setPresetName] = useState('');
-  const [savedPresets, setSavedPresets] = useState(() => {
-    const saved = localStorage.getItem('qr-presets');
-    return saved ? JSON.parse(saved) : [];
-  });
   const [copied, setCopied] = useState(false);
-  const [showGradient, setShowGradient] = useState(false);
 
   useEffect(() => {
     if (copied) {
@@ -20,10 +12,6 @@ const QRCustomizer = ({ options, onOptionsChange }) => {
       return () => clearTimeout(timer);
     }
   }, [copied]);
-
-  useEffect(() => {
-    localStorage.setItem('qr-presets', JSON.stringify(savedPresets));
-  }, [savedPresets]);
 
   const handleColorChange = (property, value) => {
     onOptionsChange({
@@ -87,15 +75,6 @@ const QRCustomizer = ({ options, onOptionsChange }) => {
       [property]: {
         ...options[property],
         gradient: gradientData
-      }
-    });
-  };
-
-  const handlePatternChange = (property, pattern) => {
-    onOptionsChange({
-      [property]: {
-        ...options[property],
-        pattern: pattern
       }
     });
   };
