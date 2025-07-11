@@ -45,7 +45,8 @@
         "workbox-window": "^7.3.0"
       },
       "engines": {
-        "node": ">=20.11.0"
+        "node": ">=20.11.0",
+        "npm": ">=10.8.2"
       }
     },
     "node_modules/@alloc/quick-lru": {

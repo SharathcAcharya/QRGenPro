@@ -8,7 +8,7 @@
     "build": "cross-env SKIP_IMAGE_OPTIMIZER=true vite build",
     "build:production": "cross-env SKIP_IMAGE_OPTIMIZER=true vite build --mode production",
     "build:nocheck": "cross-env SKIP_ESLINT=true SKIP_IMAGE_OPTIMIZER=true vite build",
-    "netlify": "node scripts/netlify-build.js && npm run build:nocheck",
+    "netlify": "node scripts/netlify-build.js && npm run fix-camera-controls && npm run build:nocheck",
     "netlify:clean": "cross-env SKIP_IMAGE_OPTIMIZER=true npm run netlify", 
     "prebuild": "npm run lint:build",
     "postbuild": "node scripts/simple-optimize.js",
@@ -23,7 +23,8 @@
     "fix-file": "node scripts/fix-specific-file.js",
     "fix-callback": "node scripts/fix-use-callback.js",
     "fix-image-deps": "node scripts/fix-image-deps.js",
-    "postinstall": "npm run fix-image-deps"
+    "fix-camera-controls": "node scripts/fix-camera-controls.js",
+    "postinstall": "npm run fix-image-deps && npm run fix-camera-controls"
   },
   "dependencies": {
     "@react-three/drei": "^10.5.0",
@@ -62,6 +63,7 @@
     "workbox-window": "^7.3.0"
   },
   "engines": {
-    "node": ">=20.11.0"
+    "node": ">=20.11.0",
+    "npm": ">=10.8.2"
   }
 }

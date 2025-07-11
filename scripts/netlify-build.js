@@ -14,6 +14,18 @@ if (nodeVersion.localeCompare(requiredNodeVersion, undefined, { numeric: true })
   console.warn('Please update the NODE_VERSION in netlify.toml to 20.11.0 or higher.');
 }
 
+// Check npm version
+import { execSync } from 'child_process';
+const npmVersion = execSync('npm --version').toString().trim();
+console.log(`Using npm version: ${npmVersion}`);
+
+// Warn if npm version is less than 10.8.2
+const requiredNpmVersion = '10.8.2';
+if (npmVersion.localeCompare(requiredNpmVersion, undefined, { numeric: true }) < 0) {
+  console.warn(`⚠️ Warning: npm ${npmVersion} is being used, but >= ${requiredNpmVersion} is required for camera-controls package.`);
+  console.warn('Please update the NPM_VERSION in netlify.toml to 10.8.2 or higher.');
+}
+
 // Set environment variables to skip ESLint for service worker files
 process.env.SKIP_ESLINT = 'true';
 process.env.ESLINT_NO_DEV_ERRORS = 'true'; 

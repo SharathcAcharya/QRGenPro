@@ -17,26 +17,27 @@
   NODE_OPTIONS = "--max-old-space-size=4096"
   # Set Node.js version to meet requirements for camera-controls@3.0.0
   NODE_VERSION = "20.11.0"
+  NPM_VERSION = "10.8.2"
 
 # Production context: all deploys from the Production branch set in your site's
 # deploy contexts will inherit these settings.
 [context.production]
-  environment = { NODE_VERSION = "20.11.0" }
+  environment = { NODE_VERSION = "20.11.0", NPM_VERSION = "10.8.2" }
 
 # Deploy Preview context: all deploys generated from a pull/merge request will
 # inherit these settings.
 [context.deploy-preview]
-  environment = { NODE_VERSION = "20.11.0" }
+  environment = { NODE_VERSION = "20.11.0", NPM_VERSION = "10.8.2" }
 
 # Branch Deploy context: deploys that aren't from a pull/merge request or from
 # the Production branch will inherit these settings.
 [context.branch-deploy]
-  environment = { NODE_VERSION = "20.11.0" }
+  environment = { NODE_VERSION = "20.11.0", NPM_VERSION = "10.8.2" }
 
 # Specific branch context: all deploys from this specific branch will inherit
 # these settings.
 [context.develop]
-  environment = { NODE_VERSION = "20.11.0" }
+  environment = { NODE_VERSION = "20.11.0", NPM_VERSION = "10.8.2" }
 
 # Asset optimization
 [build.processing]
