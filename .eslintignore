@@ -1,8 +1,0 @@
-# Ignore dev-dist (service worker and workbox files)
-dev-dist/**/*.js
-# Ignore build files
-dist/
-build/
-# Ignore auto-generated files
-vite.config.js.timestamp-*
-node_modules/

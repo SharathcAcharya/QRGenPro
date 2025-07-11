@@ -32,6 +32,7 @@
     "fix-image-deps": "node scripts/fix-image-deps.js",
     "fix-camera-controls": "node scripts/fix-camera-controls.js",
     "fix-gp-error": "node scripts/fix-gp-error.js",
+    "manual-build-helper": "node scripts/manual-build-helper.js",
     "postinstall": "npm run fix-image-deps || true && npm run fix-camera-controls || true"
   },
   "dependencies": {
