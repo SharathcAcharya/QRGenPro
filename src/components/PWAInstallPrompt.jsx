@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Monitor, Tablet, Plus } from 'lucide-react';
+import { Download, X, Smartphone, Monitor, Tablet, Plus, Info } from 'lucide-react';
 
 const PWAInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [deviceType, setDeviceType] = useState('desktop');
+  const [showManualInstructions, setShowManualInstructions] = useState(false);
   // Keep the state variables even if they appear unused - they might be used in other parts of the code
   const [canInstall, setCanInstall] = useState(false);
   const [installMetrics, setInstallMetrics] = useState({
@@ -216,6 +217,8 @@ const PWAInstallPrompt = () => {
     
     if (!deferredPrompt) {
       // No install prompt available, show manual instructions
+      console.log('No installation prompt detected, showing manual instructions');
+      setShowManualInstructions(true);
       setShowPrompt(true);
       return;
     }
@@ -258,6 +261,83 @@ const PWAInstallPrompt = () => {
       case 'tablet': return Tablet;
       default: return Monitor;
     }
+  };
+
+  const renderManualInstructions = () => {
+    if (!showManualInstructions) return null;
+    
+    let instructions = [];
+    
+    // Different instructions based on device type and browser
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
+    const isChrome = /chrome/i.test(navigator.userAgent.toLowerCase());
+    const isSafari = /safari/i.test(navigator.userAgent.toLowerCase()) && !/chrome/i.test(navigator.userAgent.toLowerCase());
+    const isFirefox = /firefox/i.test(navigator.userAgent.toLowerCase());
+    const isEdge = /edg/i.test(navigator.userAgent.toLowerCase());
+    
+    if (isIOS) {
+      instructions = [
+        "Tap the share button (📤) at the bottom of your screen",
+        "Scroll down and tap 'Add to Home Screen'",
+        "Tap 'Add' in the top right corner"
+      ];
+    } else if (deviceType === 'mobile') {
+      if (isChrome) {
+        instructions = [
+          "Tap the menu button (⋮) in the top right",
+          "Tap 'Add to Home screen'",
+          "Tap 'Add' on the confirmation"
+        ];
+      } else if (isFirefox) {
+        instructions = [
+          "Tap the menu button (⋮) in the top right",
+          "Tap 'Install' or 'Add to Home screen'"
+        ];
+      } else {
+        instructions = [
+          "Tap your browser's menu",
+          "Look for 'Install app' or 'Add to Home screen'"
+        ];
+      }
+    } else {
+      // Desktop instructions
+      if (isChrome || isEdge) {
+        instructions = [
+          "Click the install icon (⊕) in the address bar",
+          "Or click the menu (⋮) in the top right",
+          "Select 'Install QRloop...' from the menu"
+        ];
+      } else if (isFirefox) {
+        instructions = [
+          "Click the menu (≡) in the top right",
+          "Click 'Install' or '+ Add to Home screen'"
+        ];
+      } else if (isSafari) {
+        instructions = [
+          "This browser doesn't support automatic installation",
+          "Try Chrome or Edge for best experience"
+        ];
+      } else {
+        instructions = [
+          "Look for an install button in your browser",
+          "Try the browser menu for installation options"
+        ];
+      }
+    }
+    
+    return (
+      <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        <h4 className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center">
+          <Info className="w-3 h-3 mr-1" />
+          Manual Installation
+        </h4>
+        <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1 pl-5 list-decimal">
+          {instructions.map((step, index) => (
+            <li key={index}>{step}</li>
+          ))}
+        </ol>
+      </div>
+    );
   };
 
   const getInstallInstructions = () => {
@@ -308,6 +388,8 @@ const PWAInstallPrompt = () => {
               💡 {getInstallInstructions()}
             </p>
             
+            {renderManualInstructions()}
+            
             <div className="flex space-x-2">
               {deferredPrompt ? (
                 <button
@@ -320,7 +402,7 @@ const PWAInstallPrompt = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => setShowPrompt(true)}
+                  onClick={() => setShowManualInstructions(true)}
                   className="flex items-center space-x-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all transform hover:scale-105"
                   aria-label="Show installation guide"
                 >

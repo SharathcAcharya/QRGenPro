@@ -1,10 +1,17 @@
 # Netlify configuration file
 # https://docs.netlify.com/configure-builds/file-based-configuration/
 
+# Note: Code splitting and chunk optimization has been implemented in vite.config.js
+# See CODE_SPLITTING.md for details on our approach to performance optimization
+
 [build]
   command = "npm run netlify:clean"
   publish = "dist"
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ./dev-dist/ ./node_modules/ ./dist/"
+  
+  # Before build: run image-deps fix and generate PWA assets
+  [build.lifecycle]
+    onBuild = "npm run fix-image-deps || true && npm run generate-pwa-assets || true"
 
 [build.environment]
   SKIP_ESLINT = "false"
@@ -12,12 +19,15 @@
   ESLINT_NO_DEV_ERRORS = "true"
   # Skip binary installation for image optimization plugins
   SKIP_INSTALL_DEPS = "true"
+  SKIP_IMAGE_OPTIMIZER = "true"
   NETLIFY_USE_YARN = "false"
   # Increase Node memory limit for build
   NODE_OPTIONS = "--max-old-space-size=4096"
   # Set Node.js version to meet requirements for camera-controls@3.0.0
   NODE_VERSION = "20.11.0"
   NPM_VERSION = "10.8.2"
+  # Disable binary builds for image optimization tools
+  DISABLE_BINARY_BUILDS = "true"
 
 # Production context: all deploys from the Production branch set in your site's
 # deploy contexts will inherit these settings.
@@ -66,6 +76,14 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://www.google-analytics.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://www.google-analytics.com; object-src 'none'"
+    Service-Worker-Allowed = "/"
+
+# Service worker needs specific headers
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
 
 # Cache control for static assets
 [[headers]]

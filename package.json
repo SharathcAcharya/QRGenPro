@@ -8,23 +8,24 @@
     "build": "cross-env SKIP_IMAGE_OPTIMIZER=true vite build",
     "build:production": "cross-env SKIP_IMAGE_OPTIMIZER=true vite build --mode production",
     "build:nocheck": "cross-env SKIP_ESLINT=true SKIP_IMAGE_OPTIMIZER=true vite build",
-    "netlify": "node scripts/netlify-build.js && npm run fix-camera-controls && npm run build:nocheck",
+    "netlify": "node scripts/netlify-build.js && npm run fix-image-deps || true && npm run fix-camera-controls || true && npm run generate-pwa-assets || true && npm run build:nocheck",
     "netlify:clean": "cross-env SKIP_IMAGE_OPTIMIZER=true npm run netlify", 
     "prebuild": "npm run lint:build",
-    "postbuild": "node scripts/simple-optimize.js",
-    "optimize": "node scripts/simple-optimize.js",
+    "postbuild": "node scripts/simple-optimize.js || true",
+    "optimize": "node scripts/simple-optimize.js || true",
     "analyze": "vite-bundle-analyzer",
     "lint": "eslint ./src --max-warnings=0",
     "lint:fix": "eslint ./src --fix",
     "lint:build": "eslint ./src",
     "preview": "vite preview",
     "generate-sitemap": "node scripts/generate-sitemap.js",
+    "generate-pwa-assets": "node scripts/generate-pwa-assets.js",
     "fix-warnings": "node scripts/fix-eslint-warnings.js",
     "fix-file": "node scripts/fix-specific-file.js",
     "fix-callback": "node scripts/fix-use-callback.js",
     "fix-image-deps": "node scripts/fix-image-deps.js",
     "fix-camera-controls": "node scripts/fix-camera-controls.js",
-    "postinstall": "npm run fix-image-deps && npm run fix-camera-controls"
+    "postinstall": "npm run fix-image-deps || true && npm run fix-camera-controls || true"
   },
   "dependencies": {
     "@react-three/drei": "^10.5.0",
@@ -61,6 +62,12 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-plugin-pwa": "^0.20.5",
     "workbox-window": "^7.3.0"
+  },
+  "optionalDependencies": {
+    "gifsicle": "^7.0.1",
+    "jpegtran-bin": "^7.0.0",
+    "optipng-bin": "^9.0.0",
+    "pngquant-bin": "^8.0.1"
   },
   "engines": {
     "node": ">=20.11.0",

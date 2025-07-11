@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import DarkModeToggle from './components/DarkModeToggle';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import PWAInstallLogger from './components/PWAInstallLogger';
 import InstallButton from './components/InstallButton';
 import FloatingActionButton from './components/FloatingActionButton';
 import { NotificationProvider } from './components/NotificationSystem';
@@ -137,6 +138,9 @@ function App() {
   return (
     <DarkModeProvider>
       <NotificationProvider>
+        {/* Add PWA install logger for debugging */}
+        <PWAInstallLogger />
+        
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 relative overflow-hidden">
           {/* SEO Head Component */}
           <SEOHead 
